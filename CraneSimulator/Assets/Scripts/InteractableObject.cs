@@ -3,9 +3,8 @@ using UnityEngine.UI;
 
 public class InteractableObject : MonoBehaviour
 {
-    public string ItemID;
-    public string ItemName;
-    public string ItemDescription;
+    public int ItemID;
+    
 
     //private Renderer objectRenderer;
     private Outline outline;
@@ -35,18 +34,12 @@ public class InteractableObject : MonoBehaviour
         }
     }
 
-    public string GetItemName()
-    {
-        return ItemName;
-    }
+    
 
-    public string GetItemID()
+    public int GetItemID()
     {
         return ItemID;
     }
 
-    public string GetItemDescription()
-    {
-        return ItemDescription;
-    }
+    
 }

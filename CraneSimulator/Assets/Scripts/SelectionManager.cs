@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
 using System.Collections;
-
+using UnityEngine.UI;
+using UnityEngine.Networking;
 public class SelectionManager : MonoBehaviour
 {
     public GameObject interaction_Info_UI;
@@ -11,10 +12,13 @@ public class SelectionManager : MonoBehaviour
     public TextMeshProUGUI idText;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
+    public Image componentImage;
+
     public GameObject Player;
+    public float maxInspectDistance = 3f;
+
     private InteractableObject currentHoveredObject;
     private bool itemInfoVisible = false;
-
     private Coroutine currentAnimation;
 
     private void Start()
@@ -35,25 +39,37 @@ public class SelectionManager : MonoBehaviour
             var interactable = hit.transform.GetComponent<InteractableObject>();
             if (interactable != null)
             {
-                if (currentHoveredObject != interactable)
-                {
-                    ClearHighlight();
-                    currentHoveredObject = interactable;
-                    currentHoveredObject.Highlight(true);
-                }
-                interaction_text.text = interactable.GetItemName() + "\nPress 'E' to inspect";
-                interaction_Info_UI.SetActive(true);
+                // Check distance from player to object
+                float distance = Vector3.Distance(Player.transform.position, interactable.transform.position);
 
-                if (Keyboard.current.eKey.wasPressedThisFrame)
+                if (distance <= maxInspectDistance)
                 {
-                    if (!itemInfoVisible)
+                    if (currentHoveredObject != interactable)
                     {
-                        ShowItemInfo(interactable);
+                        ClearHighlight();
+                        currentHoveredObject = interactable;
+                        currentHoveredObject.Highlight(true);
                     }
-                    else
+
+                    interaction_text.text = "\nPress 'E' to inspect";
+                    interaction_Info_UI.SetActive(true);
+
+                    if (Keyboard.current.eKey.wasPressedThisFrame)
                     {
-                        HideItemInfo();
+                        if (!itemInfoVisible)
+                        {
+                            ShowItemInfo(interactable);
+                        }
+                        else
+                        {
+                            HideItemInfo();
+                        }
                     }
+                }
+                else
+                {
+                    // Too far → clear prompt and highlight
+                    ClearSelection();
                 }
             }
             else
@@ -67,12 +83,9 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
-    void ShowItemInfo(InteractableObject item)
+    
+    async void ShowItemInfo(InteractableObject item)
     {
-        idText.text = "ID: " + item.GetItemID();
-        nameText.text = "Name: " + item.GetItemName();
-        descriptionText.text = "Description: " + item.GetItemDescription();
-
         interaction_Info_UI.SetActive(false);
         Player.SetActive(false);
         itemInfoVisible = true;
@@ -81,7 +94,40 @@ public class SelectionManager : MonoBehaviour
             StopCoroutine(currentAnimation);
         itemInfoCard_UI.SetActive(true);
         currentAnimation = StartCoroutine(ScaleRectTransform(itemInfoCard_UI.transform, Vector3.zero, Vector3.one, 0.3f));
+
+        idText.text = "Loading...";
+        nameText.text = "";
+        descriptionText.text = "";
+
+        var apiService = FindObjectOfType<ApiService>();
+        if (apiService == null)
+        {
+            Debug.LogError("No ApiService found in scene!");
+            return;
+        }
+
+        int componentId = item.GetItemID();
+        ComponentDto data = await apiService.GetComponentByIdAsync(componentId);
+
+        if (data != null)
+        {
+            idText.text = "ID: " + data.id;
+            nameText.text = "Name: " + data.name;
+            descriptionText.text = "Description: " + data.description;
+            if (!string.IsNullOrEmpty(data.imageUrl))
+            {
+                StartCoroutine(LoadImage(data.imageUrl));
+            }
+        }
+        else
+        {
+            idText.text = "Error";
+            nameText.text = "Could not load";
+            descriptionText.text = "";
+            componentImage.sprite = null; // Clear image
+        }
     }
+
 
     void HideItemInfo()
     {
@@ -138,4 +184,34 @@ public class SelectionManager : MonoBehaviour
         itemInfoCard_UI.transform.localScale = Vector3.zero;
         itemInfoVisible = false;
     }
+    IEnumerator LoadImage(string url)
+    {
+        if (componentImage == null)
+        {
+            Debug.LogError("⚠️ No UI Image assigned to SelectionManager.componentImage!");
+            yield break;
+        }
+
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("Image load failed: " + request.error);
+            }
+            else
+            {
+                Texture2D texture = DownloadHandlerTexture.GetContent(request);
+                Sprite sprite = Sprite.Create(
+                    texture,
+                    new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(0.5f, 0.5f)
+                );
+                componentImage.sprite = sprite;
+            }
+        }
+    }
+
+
 }
