@@ -5,11 +5,15 @@ public class CrawlerCraneController : MonoBehaviour
     public float moveSpeed = 10f;   // speed forward/backward
     public float turnSpeed = 50f;   // rotation speed
 
+    public HingeJoint boomHingeJoint;      // Reference to the HingeJoint
+    public float boomMotorSpeed = 30f;     // How fast the boom moves
+
     private Rigidbody rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        //boomHingeJoint = GetComponentInChildren<HingeJoint>();
     }
 
     void FixedUpdate()
@@ -25,6 +29,9 @@ public class CrawlerCraneController : MonoBehaviour
         // Rotate left/right
         Quaternion turn = Quaternion.Euler(0f, turnInput * turnSpeed * Time.fixedDeltaTime, 0f);
         rb.MoveRotation(rb.rotation * turn);
+
+        // Boom control
+        HandleBoomControl();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -47,6 +54,19 @@ public class CrawlerCraneController : MonoBehaviour
         {
             rb.isKinematic = true;  // Stops physics on container
         }
+    }
+
+    private void HandleBoomControl()
+    {
+        float boomInput = 0f;
+        if (Input.GetKey(KeyCode.M)) boomInput += 1f;
+        if (Input.GetKey(KeyCode.N)) boomInput -= 1f;
+
+        JointMotor motor = boomHingeJoint.motor;
+        motor.force = 1000f; // How strong the joint is
+        motor.targetVelocity = boomInput * boomMotorSpeed;
+        boomHingeJoint.motor = motor;
+        boomHingeJoint.useMotor = Mathf.Abs(boomInput) > 0.01f;
     }
 
 }
