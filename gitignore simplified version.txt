@@ -1,0 +1,19 @@
+# Ignore OS-specific junk
+.DS_Store
+Thumbs.db
+
+# IDE caches
+.vs/
+.gradle/
+
+# Logs and crashes
+[Ll]ogs/
+sysinfo.txt
+
+# Builds (optional – keep artifacts out of repo)
+[Bb]uild/
+[Bb]uilds/
+*.apk
+*.aab
+*.unitypackage
+*.app
