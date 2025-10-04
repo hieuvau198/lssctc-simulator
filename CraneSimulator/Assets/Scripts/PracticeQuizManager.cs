@@ -26,7 +26,7 @@ public class PracticeQuizManager : MonoBehaviour
     private PracticeStep[] steps;
     private int currentIndex = 0;
 
-    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/PracticeSteps/practice/1";
+    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/PracticeSteps/practice/";
 
     void Start()
     {
@@ -61,7 +61,14 @@ public class PracticeQuizManager : MonoBehaviour
 
     IEnumerator FetchSteps()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get(apiUrl))
+        int selectedPracticeId = PlayerPrefs.GetInt("selectedPracticeId", -1);
+        if (selectedPracticeId == -1)
+        {
+            Debug.LogError("No practice selected!");
+            yield break;
+        }
+        string fullUrl = apiUrl + selectedPracticeId;
+        using (UnityWebRequest www = UnityWebRequest.Get(fullUrl))
         {
             yield return www.SendWebRequest();
 
