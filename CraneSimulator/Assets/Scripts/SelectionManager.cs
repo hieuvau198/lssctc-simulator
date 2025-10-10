@@ -21,12 +21,23 @@ public class SelectionManager : MonoBehaviour
     private bool itemInfoVisible = false;
     private Coroutine currentAnimation;
 
+    //camera
+    [Header("Crane Cameras")]
+    public Camera playerCamera;
+    public GameObject craneCamera;
+
+    private bool inCraneView = false;
     private void Start()
     {
         interaction_text = interaction_Info_UI.GetComponent<TextMeshProUGUI>();
         interaction_Info_UI.SetActive(false);
         itemInfoCard_UI.SetActive(false);
         itemInfoCard_UI.transform.localScale = Vector3.zero; // Start scaled down
+
+        //camera
+        if (playerCamera != null) playerCamera.enabled = true;
+        if (craneCamera != null) craneCamera.SetActive(false);
+        
     }
 
     void Update()
@@ -65,6 +76,13 @@ public class SelectionManager : MonoBehaviour
                             HideItemInfo();
                         }
                     }
+                    if (Keyboard.current.fKey.wasPressedThisFrame)
+                    {
+                        if (!inCraneView)
+                            EnterCraneView();
+                        else
+                            ExitCraneView();
+                    }
                 }
                 else
                 {
@@ -83,7 +101,31 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
-    
+    void EnterCraneView()
+    {
+        inCraneView = true;
+        interaction_Info_UI.SetActive(false);
+        Player.SetActive(false);
+
+        //if (playerCamera != null) playerCamera.enabled = false;
+        if (craneCamera != null) craneCamera.SetActive(true);
+        
+
+        Debug.Log("Entered crane camera view");
+    }
+
+    void ExitCraneView()
+    {
+        inCraneView = false;
+        interaction_Info_UI.SetActive(true);
+        Player.SetActive(true);
+
+        //if (playerCamera != null) playerCamera.enabled = true;
+        if (craneCamera != null) craneCamera.SetActive(false);
+        
+
+        Debug.Log("Returned to player view");
+    }
     async void ShowItemInfo(InteractableObject item)
     {
         interaction_Info_UI.SetActive(false);
