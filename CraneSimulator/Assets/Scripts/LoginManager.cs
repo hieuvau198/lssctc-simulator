@@ -15,6 +15,7 @@ public class LoginManager : MonoBehaviour
 
     public void OnLoginButtonClicked()
     {
+        PlayerPrefs.SetInt("UserID",1);
         SceneManager.LoadScene("PracticeListScene");
         //StartCoroutine(LoginCoroutine());
     }

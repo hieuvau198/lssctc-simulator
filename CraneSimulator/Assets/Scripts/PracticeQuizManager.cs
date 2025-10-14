@@ -4,16 +4,24 @@ using UnityEngine.Networking;
 using System.Collections;
 
 [System.Serializable]
-public class PracticeStep
+public class TraineePracticeStep
 {
-    public int id;
-    public int practiceId;
+    public int stepId;
     public string stepName;
     public string stepDescription;
     public string expectedResult;
     public int stepOrder;
-}
+    public bool isCompleted;
+    public int practiceId;
 
+    // Optional extra fields if you want to expand UI later
+    public string actionName;
+    public string actionDescription;
+    public string actionKey;
+    public string componentName;
+    public string componentDescription;
+    public string componentImageUrl;
+}
 public class PracticeQuizManager : MonoBehaviour
 {
     [Header("UI References")]
@@ -23,22 +31,21 @@ public class PracticeQuizManager : MonoBehaviour
     public TextMeshProUGUI expectedResult;
     public TextMeshProUGUI stepCounter;
 
-    private PracticeStep[] steps;
+    private TraineePracticeStep[] steps;
     private int currentIndex = 0;
 
-    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/PracticeSteps/practice/";
+    // New API URL
+    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/TraineePractices/practice/";
 
     void Start()
     {
         quizPanel.SetActive(false);
-
-        // Fetch steps at start so it's ready
         StartCoroutine(FetchSteps());
     }
 
     void Update()
     {
-        // Toggle panel with Tab key
+        // Toggle quiz panel
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             quizPanel.SetActive(!quizPanel.activeSelf);
@@ -49,7 +56,8 @@ public class PracticeQuizManager : MonoBehaviour
             }
         }
 
-        if (quizPanel.activeSelf) // only works when panel is open
+        // Navigation with Q / E
+        if (quizPanel.activeSelf && steps != null && steps.Length > 0)
         {
             if (Input.GetKeyDown(KeyCode.Q))
                 ShowStep(currentIndex - 1, true);
@@ -62,24 +70,42 @@ public class PracticeQuizManager : MonoBehaviour
     IEnumerator FetchSteps()
     {
         int selectedPracticeId = PlayerPrefs.GetInt("selectedPracticeId", -1);
-        if (selectedPracticeId == -1)
+        int userId = PlayerPrefs.GetInt("UserID", 0);
+
+        if (selectedPracticeId == -1 || userId == 0)
         {
-            Debug.LogError("No practice selected!");
+            Debug.LogError("Missing selected practice ID or user ID!");
             yield break;
         }
-        string fullUrl = apiUrl + selectedPracticeId;
+
+        string fullUrl = $"{apiUrl}{selectedPracticeId}/trainee/{userId}/steps";
+        Debug.Log($"Fetching steps from: {fullUrl}");
+
         using (UnityWebRequest www = UnityWebRequest.Get(fullUrl))
         {
             yield return www.SendWebRequest();
 
             if (www.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogError("Failed to fetch steps: " + www.error);
+                Debug.LogError($"Failed to fetch steps: {www.error}\nURL: {fullUrl}");
+                Debug.LogError("Response: " + www.downloadHandler.text);
             }
             else
             {
                 string json = www.downloadHandler.text;
-                steps = JsonHelper.FromJson<PracticeStep>(json);
+                Debug.Log("Steps JSON:\n" + json);
+
+                steps = JsonHelper.FromJson<TraineePracticeStep>(json);
+
+                if (steps != null && steps.Length > 0)
+                {
+                    currentIndex = 0;
+                    ShowStep(currentIndex);
+                }
+                else
+                {
+                    Debug.LogWarning("No steps found for this practice!");
+                }
             }
         }
     }
@@ -90,7 +116,8 @@ public class PracticeQuizManager : MonoBehaviour
 
         currentIndex = Mathf.Clamp(index, 0, steps.Length - 1);
 
-        if (animate) StartCoroutine(AnimateStepChange());
+        if (animate)
+            StartCoroutine(AnimateStepChange());
 
         stepTitle.text = steps[currentIndex].stepName;
         stepDescription.text = steps[currentIndex].stepDescription;
@@ -101,9 +128,7 @@ public class PracticeQuizManager : MonoBehaviour
     IEnumerator AnimateStepChange()
     {
         CanvasGroup cg = quizPanel.GetComponent<CanvasGroup>();
-
-        if (cg == null) // Add CanvasGroup dynamically if missing
-            cg = quizPanel.AddComponent<CanvasGroup>();
+        if (cg == null) cg = quizPanel.AddComponent<CanvasGroup>();
 
         // Fade out
         for (float t = 1; t >= 0; t -= Time.deltaTime * 3)
@@ -111,8 +136,6 @@ public class PracticeQuizManager : MonoBehaviour
             cg.alpha = t;
             yield return null;
         }
-
-        // (Texts are updated in ShowStep before fade-in starts)
 
         // Fade in
         for (float t = 0; t <= 1; t += Time.deltaTime * 3)
@@ -122,3 +145,4 @@ public class PracticeQuizManager : MonoBehaviour
         }
     }
 }
+
