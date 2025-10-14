@@ -6,8 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Scenes/CraneSimulation.unity
     guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/Login.unity
+    guid: 5057090e3a8b89245a099a091b549b31
+  - enabled: 1
+    path: Assets/Scenes/PracticeListScene.unity
+    guid: 0c8962cbc8451484a94cab403cfd536b
+  - enabled: 1
+    path: Assets/Scenes/SimulationScene.unity
+    guid: 9a296b452ff6b1e4891ec0fb7605c52b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
