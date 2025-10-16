@@ -8,6 +8,7 @@ public class BoomForward : MonoBehaviour
     private Vector3 maxBoom_2;
     public float min_Boom2F = 0;
     public float max_Boom2F = 0;
+
     [Header("Boom 3")]
     public Transform boom3;
     private Vector3 minBoom_3;
@@ -37,9 +38,12 @@ public class BoomForward : MonoBehaviour
         maxBoom_3 = new Vector3(boom3.localPosition.x, max_Boom3F, boom3.localPosition.z);
 
 
-        mainRope.positionCount = 2;
-        mainRope.startWidth = 0.03f;
-        mainRope.endWidth = 0.03f;
+        if (mainRope != null)
+        {
+            mainRope.positionCount = 2;
+            mainRope.startWidth = 0.03f;
+            mainRope.endWidth = 0.03f;
+        }
     }
 
     void Update()
@@ -54,7 +58,7 @@ public class BoomForward : MonoBehaviour
             boomFor_Bool = true;
             BoomMoveForward();
         }
-        UpdateRope();
+        
     }
     private void BoomMoveForward()
     {
@@ -78,13 +82,13 @@ public class BoomForward : MonoBehaviour
             }
         }
     }
-    private void UpdateRope()
-    {
-        if (mainRopeStart == null || mainRopeEnd == null) return;
+    //private void UpdateRope()
+    //{
+    //    if (mainRopeStart == null || mainRopeEnd == null) return;
 
-        // Draw straight line from start to end
-        mainRope.SetPosition(0, mainRopeStart.position);
-        mainRope.SetPosition(1, mainRopeEnd.position);
-    }
+    //    // Draw straight line from start to end
+    //    mainRope.SetPosition(0, mainRopeStart.position);
+    //    mainRope.SetPosition(1, mainRopeEnd.position);
+    //}
 
 }

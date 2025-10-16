@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class InteractableObject : MonoBehaviour
 {
     public int ItemID;
-    
+    public MonoBehaviour controlScript;
 
     //private Renderer objectRenderer;
     private Outline outline;
