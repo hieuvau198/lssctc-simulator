@@ -1,41 +1,36 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
-using System.Collections;
-using UnityEngine.UI;
+using System.Threading.Tasks;
 using UnityEngine.Networking;
+using System.Collections;
 
 public class SelectionManager : MonoBehaviour
 {
-    // === UI ===
     [Header("UI References")]
     public GameObject interaction_Info_UI;
     private TextMeshProUGUI interaction_text;
-    public GameObject itemInfoCard_UI; // Panel with Id, Name, Description texts
+    public GameObject itemInfoCard_UI;
     public TextMeshProUGUI idText;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
-    public Image componentImage;
+    public UnityEngine.UI.Image componentImage;
 
     [Header("Settings Panel")]
-    public GameObject settingsPanel; // Assign in Inspector
+    public GameObject settingsPanel;
     private bool settingsOpen = false;
 
-    // === Player ===
     public GameObject Player;
     public float maxInspectDistance = 3f;
 
-    // === Interaction ===
     private InteractableObject currentHoveredObject;
     private bool itemInfoVisible = false;
     private Coroutine currentAnimation;
 
-    // === Control ===
     private InteractableObject currentControlledObject;
     private MonoBehaviour currentControlledScript;
     private bool inControlMode = false;
 
-    // === Camera ===
     [Header("Crane Cameras")]
     public Camera playerCamera;
     public GameObject craneCamera;
@@ -50,17 +45,14 @@ public class SelectionManager : MonoBehaviour
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 
-        // Setup cameras
         if (playerCamera != null) playerCamera.enabled = true;
         if (craneCamera != null) craneCamera.SetActive(false);
     }
 
     void Update()
     {
-        // --- SETTINGS MENU TOGGLE ---
         if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            // If inspecting or controlling, close those first
             if (itemInfoVisible)
             {
                 HideItemInfo();
@@ -81,7 +73,6 @@ public class SelectionManager : MonoBehaviour
         if (settingsOpen || itemInfoVisible || inControlMode)
             return;
 
-        // --- Raycast for interactions ---
         Vector2 mousePos = Mouse.current.position.ReadValue();
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
         RaycastHit hit;
@@ -102,82 +93,55 @@ public class SelectionManager : MonoBehaviour
                         currentHoveredObject.Highlight(true);
                     }
 
-                    interaction_text.text = "Press 'E' to inspect";
+                    //interaction_text.text = "Press 'E' to inspect";
                     if (interactable.controlScript != null)
-                        interaction_text.text += "\nPress 'F' to control";
+                        //interaction_text.text += "\nPress 'F' to control";
 
                     interaction_Info_UI.SetActive(true);
 
-                    // --- Inspect Info ---
                     if (Keyboard.current.eKey.wasPressedThisFrame)
                     {
                         if (!itemInfoVisible)
                             ShowItemInfo(interactable);
                         else
                             HideItemInfo();
-                        StartCoroutine(SubmitStepProgress(interactable.GetItemID(), "I"));
+
+                        _ = SubmitStepProgress(interactable.GetItemID(), "I");
                     }
 
-                    // --- Control Mode (if available) ---
                     if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
                     {
                         ToggleObjectControl(interactable);
-                        StartCoroutine(SubmitStepProgress(interactable.GetItemID(), "F"));
+                        _ = SubmitStepProgress(interactable.GetItemID(), "F");
                     }
                 }
-                else
-                {
-                    ClearSelection();
-                }
+                else ClearSelection();
             }
-            else
-            {
-                ClearSelection();
-            }
+            else ClearSelection();
         }
-        else
-        {
-            ClearSelection();
-        }
+        else ClearSelection();
     }
 
-    // === SETTINGS ===
     void ToggleSettingsPanel()
     {
-        if (settingsPanel == null)
-        {
-            Debug.LogWarning("Settings Panel not assigned!");
-            return;
-        }
+        if (settingsPanel == null) { Debug.LogWarning("Settings Panel not assigned!"); return; }
 
         settingsOpen = !settingsOpen;
         settingsPanel.SetActive(settingsOpen);
 
-        // Pause or resume the game
         Time.timeScale = settingsOpen ? 0f : 1f;
-
-        // Unlock or lock the cursor
         Cursor.lockState = settingsOpen ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = settingsOpen;
 
-        // Disable player camera control while in settings
         Player.SetActive(!settingsOpen);
         interaction_Info_UI.SetActive(!settingsOpen);
-
-        Debug.Log(settingsOpen ? "Settings opened" : "Settings closed");
     }
 
-    // === Control Logic ===
     void ToggleObjectControl(InteractableObject interactable)
     {
-        if (currentControlledObject == interactable)
-        {
-            ExitControlMode();
-            return;
-        }
+        if (currentControlledObject == interactable) { ExitControlMode(); return; }
 
-        if (currentControlledScript != null)
-            currentControlledScript.enabled = false;
+        if (currentControlledScript != null) currentControlledScript.enabled = false;
 
         currentControlledObject = interactable;
         currentControlledScript = interactable.controlScript;
@@ -189,34 +153,26 @@ public class SelectionManager : MonoBehaviour
             if (craneCamera != null) craneCamera.SetActive(true);
             inControlMode = true;
             interaction_Info_UI.SetActive(false);
-            Debug.Log($"Now controlling: {interactable.name}");
         }
     }
 
     void ExitControlMode()
     {
-        if (currentControlledScript != null)
-            currentControlledScript.enabled = false;
-
+        if (currentControlledScript != null) currentControlledScript.enabled = false;
         Player.SetActive(true);
         if (craneCamera != null) craneCamera.SetActive(false);
-
         currentControlledObject = null;
         currentControlledScript = null;
         inControlMode = false;
-
-        Debug.Log("Exited control mode");
     }
 
-    // === Inspect Info ===
     async void ShowItemInfo(InteractableObject item)
     {
         interaction_Info_UI.SetActive(false);
         Player.SetActive(false);
         itemInfoVisible = true;
 
-        if (currentAnimation != null)
-            StopCoroutine(currentAnimation);
+        if (currentAnimation != null) StopCoroutine(currentAnimation);
         itemInfoCard_UI.SetActive(true);
         currentAnimation = StartCoroutine(ScaleRectTransform(itemInfoCard_UI.transform, Vector3.zero, Vector3.one, 0.3f));
 
@@ -224,15 +180,8 @@ public class SelectionManager : MonoBehaviour
         nameText.text = "";
         descriptionText.text = "";
 
-        var apiService = FindObjectOfType<ApiService>();
-        if (apiService == null)
-        {
-            Debug.LogError("No ApiService found in scene!");
-            return;
-        }
-
         int componentId = item.GetItemID();
-        ComponentDto data = await apiService.GetComponentByIdAsync(componentId);
+        var data = await ApiService.Instance.GetComponentByIdAsync(componentId);
 
         if (data != null)
         {
@@ -257,8 +206,7 @@ public class SelectionManager : MonoBehaviour
         Player.SetActive(true);
         itemInfoVisible = false;
 
-        if (currentAnimation != null)
-            StopCoroutine(currentAnimation);
+        if (currentAnimation != null) StopCoroutine(currentAnimation);
         currentAnimation = StartCoroutine(ScaleAndDisable(itemInfoCard_UI.transform, Vector3.one, Vector3.zero, 0.3f));
     }
 
@@ -300,8 +248,7 @@ public class SelectionManager : MonoBehaviour
     {
         ClearHighlight();
         interaction_Info_UI.SetActive(false);
-        if (currentAnimation != null)
-            StopCoroutine(currentAnimation);
+        if (currentAnimation != null) StopCoroutine(currentAnimation);
         itemInfoCard_UI.SetActive(false);
         itemInfoCard_UI.transform.localScale = Vector3.zero;
         itemInfoVisible = false;
@@ -326,18 +273,14 @@ public class SelectionManager : MonoBehaviour
             else
             {
                 Texture2D texture = DownloadHandlerTexture.GetContent(request);
-                Sprite sprite = Sprite.Create(
-                    texture,
-                    new Rect(0, 0, texture.width, texture.height),
-                    new Vector2(0.5f, 0.5f)
-                );
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
                 componentImage.sprite = sprite;
             }
         }
     }
 
-    // === Submit Step API ===
-    IEnumerator SubmitStepProgress(int componentId, string actionKey)
+    // Submit step using ApiService
+    private async Task SubmitStepProgress(int componentId, string actionKey)
     {
         int attemptId = PlayerPrefs.GetInt("practiceAttemptId", 0);
         int userId = PlayerPrefs.GetInt("UserID", 0);
@@ -346,61 +289,40 @@ public class SelectionManager : MonoBehaviour
         if (quizManager == null)
         {
             Debug.LogError("PracticeQuizManager not found in scene!");
-            yield break;
+            return;
         }
 
         int currentStepId = quizManager.CurrentStepId;
         if (attemptId == 0 || userId == 0 || currentStepId == -1)
         {
             Debug.LogError("Missing attemptId, userId, or currentStepId!");
-            yield break;
+            return;
         }
 
-        string apiUrl = $"https://lssctc-simulation.azurewebsites.net/api/TraineePractices/attempt/{attemptId}/trainee/{userId}/submit";
-        Debug.Log($"Submitting step: {apiUrl}");
-
-        string jsonBody = JsonUtility.ToJson(new SubmitStepData
+        var dto = new SubmitStepData
         {
             currentStepId = currentStepId,
             componentId = componentId,
             actionKey = actionKey
-        });
+        };
 
-        using (UnityWebRequest request = new UnityWebRequest(apiUrl, "POST"))
+        string raw = await ApiService.Instance.SubmitStepAsync(attemptId, userId, dto);
+        if (string.IsNullOrEmpty(raw))
         {
-            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
+            Debug.LogError("Submit failed or empty response");
+            return;
+        }
 
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError($"Submit failed: {request.error}\nResponse: {request.downloadHandler.text}");
-                yield break;
-            }
-
-            string response = request.downloadHandler.text.Trim();
-            Debug.Log($"Submit response: {response}");
-
-            if (response.Contains("\"message\":\"Trainee step attempt submitted successfully.\""))
-            {
-                Debug.Log("Step submission confirmed by server.");
-                quizManager.MarkStepAsDone();
-            }
-            else
-            {
-                Debug.LogWarning(" Step not marked done — server did not return success message.");
-            }
+        // server returned JSON with message — same check as before
+        if (raw.Contains("\"message\":\"Trainee step attempt submitted successfully.\""))
+        {
+            Debug.Log("Step submission confirmed by server.");
+            quizManager.MarkStepAsDone();
+        }
+        else
+        {
+            Debug.LogWarning("Step not marked done — server did not return success message. Response: " + raw);
         }
     }
 
-    [System.Serializable]
-    public class SubmitStepData
-    {
-        public int currentStepId;
-        public int componentId;
-        public string actionKey;
-    }
 }
