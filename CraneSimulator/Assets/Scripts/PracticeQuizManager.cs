@@ -31,11 +31,18 @@ public class PracticeQuizManager : MonoBehaviour
     public TextMeshProUGUI expectedResult;
     public TextMeshProUGUI stepCounter;
 
+
+    [Header("Optional Always-On Display")]
+    public TextMeshProUGUI currentStepDisplay;
+
     private TraineePracticeStep[] steps;
     private int currentIndex = 0;
 
-    // New API URL
-    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/TraineePractices/practice/";
+    //current step key for PlayerPrefs
+    private const string CURRENT_STEP_KEY = "CurrentStepId";
+    public int CurrentStepId => (steps != null && currentIndex < steps.Length) ? steps[currentIndex].stepId : -1;
+
+    private string apiUrl = "https://lssctc-simulation.azurewebsites.net/api/TraineePractices/attempt/";
 
     void Start()
     {
@@ -71,14 +78,14 @@ public class PracticeQuizManager : MonoBehaviour
     {
         int selectedPracticeId = PlayerPrefs.GetInt("selectedPracticeId", -1);
         int userId = PlayerPrefs.GetInt("UserID", 0);
-
+        int atempId = PlayerPrefs.GetInt("practiceAttemptId", 0);
         if (selectedPracticeId == -1 || userId == 0)
         {
             Debug.LogError("Missing selected practice ID or user ID!");
             yield break;
         }
 
-        string fullUrl = $"{apiUrl}{selectedPracticeId}/trainee/{userId}/steps";
+        string fullUrl = $"{apiUrl}{atempId}/steps";
         Debug.Log($"Fetching steps from: {fullUrl}");
 
         using (UnityWebRequest www = UnityWebRequest.Get(fullUrl))
@@ -88,7 +95,6 @@ public class PracticeQuizManager : MonoBehaviour
             if (www.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogError($"Failed to fetch steps: {www.error}\nURL: {fullUrl}");
-                Debug.LogError("Response: " + www.downloadHandler.text);
             }
             else
             {
@@ -99,7 +105,9 @@ public class PracticeQuizManager : MonoBehaviour
 
                 if (steps != null && steps.Length > 0)
                 {
-                    currentIndex = 0;
+                    int savedStepId = PlayerPrefs.GetInt(CURRENT_STEP_KEY, steps[0].stepId);
+                    int index = System.Array.FindIndex(steps, s => s.stepId == savedStepId);
+                    currentIndex = index >= 0 ? index : 0;
                     ShowStep(currentIndex);
                 }
                 else
@@ -109,7 +117,28 @@ public class PracticeQuizManager : MonoBehaviour
             }
         }
     }
+    public void MarkStepAsDone()
+    {
+        if (steps == null || steps.Length == 0) return;
 
+        steps[currentIndex].isCompleted = true;
+        PlayerPrefs.SetInt(CURRENT_STEP_KEY, steps[currentIndex].stepId);
+        PlayerPrefs.Save();
+
+        Debug.Log($"Step {steps[currentIndex].stepOrder} marked done.");
+
+        // Move to next step automatically if available
+        if (currentIndex < steps.Length - 1)
+        {
+            currentIndex++;
+            Debug.Log($"Moving to next step: {steps[currentIndex].stepName}");
+            ShowStep(currentIndex, true);
+        }
+        else
+        {
+            Debug.Log("All steps completed!");
+        }
+    }
     void ShowStep(int index, bool animate = false)
     {
         if (steps == null || steps.Length == 0) return;
@@ -123,26 +152,73 @@ public class PracticeQuizManager : MonoBehaviour
         stepDescription.text = steps[currentIndex].stepDescription;
         expectedResult.text = steps[currentIndex].expectedResult;
         stepCounter.text = $"Step {currentIndex + 1}/{steps.Length}";
+
+        if (currentStepDisplay != null)
+        {
+            currentStepDisplay.text = $"Current Step: {currentIndex + 1}/{steps.Length} - {steps[currentIndex].stepName}";
+        }
     }
+
+    //IEnumerator AnimateStepChange()
+    //{
+    //    CanvasGroup cg = quizPanel.GetComponent<CanvasGroup>();
+    //    if (cg == null) cg = quizPanel.AddComponent<CanvasGroup>();
+
+    //    // Fade out
+    //    for (float t = 1; t >= 0; t -= Time.deltaTime * 3)
+    //    {
+    //        cg.alpha = t;
+    //        yield return null;
+    //    }
+
+    //    // Fade in
+    //    for (float t = 0; t <= 1; t += Time.deltaTime * 3)
+    //    {
+    //        cg.alpha = t;
+    //        yield return null;
+    //    }
+    //}
 
     IEnumerator AnimateStepChange()
     {
         CanvasGroup cg = quizPanel.GetComponent<CanvasGroup>();
         if (cg == null) cg = quizPanel.AddComponent<CanvasGroup>();
 
-        // Fade out
-        for (float t = 1; t >= 0; t -= Time.deltaTime * 3)
+        RectTransform rect = quizPanel.GetComponent<RectTransform>();
+        Vector3 originalScale = rect.localScale;
+
+        float duration = 0.5f; // smoother timing
+        float pauseTime = 0.2f; // short delay between fade out and fade in
+
+        // === Fade Out with scale shrink ===
+        for (float t = 0; t < duration; t += Time.deltaTime)
         {
-            cg.alpha = t;
+            float normalized = t / duration;
+            float smooth = Mathf.SmoothStep(1f, 0f, normalized);
+            cg.alpha = 1f - smooth;
+            rect.localScale = Vector3.Lerp(originalScale, originalScale * 0.97f, smooth); // slight shrink
             yield return null;
         }
 
-        // Fade in
-        for (float t = 0; t <= 1; t += Time.deltaTime * 3)
+        cg.alpha = 0;
+        rect.localScale = originalScale * 0.97f;
+
+        // === Pause before showing new step ===
+        yield return new WaitForSeconds(pauseTime);
+
+        // === Fade In with scale grow ===
+        for (float t = 0; t < duration; t += Time.deltaTime)
         {
-            cg.alpha = t;
+            float normalized = t / duration;
+            float smooth = Mathf.SmoothStep(0f, 1f, normalized);
+            cg.alpha = smooth;
+            rect.localScale = Vector3.Lerp(originalScale * 0.97f, originalScale, smooth); // gentle grow
             yield return null;
         }
+
+        cg.alpha = 1;
+        rect.localScale = originalScale;
     }
+
 }
 

@@ -17,7 +17,7 @@ public class PracticeListManager : MonoBehaviour
     public TMP_Dropdown classDropdown;
 
     //api url
-    private string traineePracticeApiUrl = "https://lssctc-simulation.azurewebsites.net/api/TraineePractices/";
+    private string traineePracticeApiUrl = "https://lssctc-simulation.azurewebsites.net/api/";
     private string classApiUrl = "https://lssctc.azurewebsites.net/api/Classes/myclasses/";
 
     private int userId;
@@ -123,7 +123,7 @@ public class PracticeListManager : MonoBehaviour
         foreach (Transform child in contentPanel)
             Destroy(child.gameObject);
 
-        string apiUrl = $"{traineePracticeApiUrl}trainee/{userId}/class/{classId}";
+        string apiUrl = $"{traineePracticeApiUrl}TraineePractices/trainee/{userId}/class/{classId}";
         //string token = PlayerPrefs.GetString("jwtToken", "");
 
         UnityWebRequest request = UnityWebRequest.Get(apiUrl);
@@ -171,7 +171,9 @@ public class PracticeListManager : MonoBehaviour
                     PlayerPrefs.SetString("selectedPracticeDescription", practice.practiceDescription);
                     PlayerPrefs.SetString("selectedPracticeDifficulty", practice.difficultyLevel);
                     PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("SimulationScene");
+                    PlayerPrefs.Save();
+
+                    StartCoroutine(CreatePracticeAttempt(practice.sectionPracticeId, userId));
                 });
             }
         }
@@ -181,60 +183,41 @@ public class PracticeListManager : MonoBehaviour
             Debug.LogError(request.downloadHandler.text);
         }
     }
-    //IEnumerator FetchPractices()
-    //{
-    //    string token = PlayerPrefs.GetString("jwtToken", "");
 
-    //    UnityWebRequest request = UnityWebRequest.Get(traineePracticeApiUrl);
-    //    request.SetRequestHeader("Authorization", "Bearer " + token);
-    //    request.SetRequestHeader("Content-Type", "application/json");
+    IEnumerator CreatePracticeAttempt(int sectionPracticeId, int userId)
+    {
+        string apiUrl = $"{traineePracticeApiUrl}PracticeAttempts/section-practice/{sectionPracticeId}/trainee/{userId}";
+        UnityWebRequest request = UnityWebRequest.PostWwwForm(apiUrl, "");
 
-    //    yield return request.SendWebRequest();
+        request.SetRequestHeader("Content-Type", "application/json");
+        //string token = PlayerPrefs.GetString("jwtToken", "");
+        //if (!string.IsNullOrEmpty(token))
+        //    request.SetRequestHeader("Authorization", "Bearer " + token);
 
-    //    if (request.result == UnityWebRequest.Result.Success)
-    //    {
-    //        string json = request.downloadHandler.text;
-    //        PracticeResponse response = JsonUtility.FromJson<PracticeResponse>(json);
+        yield return request.SendWebRequest();
 
-    //        if (response.items == null || response.items.Count == 0)
-    //        {
-    //            errorText.text = "No practices available for this user.";
-    //            yield break;
-    //        }
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string json = request.downloadHandler.text;
+            Debug.Log($"[DEBUG] PracticeAttempt created: {json}");
 
-    //        foreach (var practice in response.items)
-    //        {
-    //            GameObject card = Instantiate(practiceCardPrefab, contentPanel);
+            // Deserialize JSON response
+            PracticeAttemptResponse response = JsonUtility.FromJson<PracticeAttemptResponse>(json);
 
-    //            // find children inside the prefab
-    //            TextMeshProUGUI nameText = card.transform.Find("PracticeNameText").GetComponent<TextMeshProUGUI>();
-    //            TextMeshProUGUI descText = card.transform.Find("PracticeDescriptionText").GetComponent<TextMeshProUGUI>();
-    //            TextMeshProUGUI durationText = card.transform.Find("PracticeDurationText").GetComponent<TextMeshProUGUI>();
-    //            TextMeshProUGUI difficultyText = card.transform.Find("PracticeDifficultyText").GetComponent<TextMeshProUGUI>();
-    //            Button startButton = card.transform.Find("StartButton").GetComponent<Button>();
+            // Save the attempt ID to PlayerPrefs
+            PlayerPrefs.SetInt("practiceAttemptId", response.practiceAttemptId);
+            PlayerPrefs.Save();
 
-    //            nameText.text = practice.practiceName;
-    //            descText.text = practice.practiceDescription;
-    //            durationText.text = $"{practice.estimatedDurationMinutes} min";
-    //            difficultyText.text = practice.difficultyLevel;
-
-    //            startButton.onClick.AddListener(() =>
-    //            {
-    //                PlayerPrefs.SetInt("selectedPracticeId", practice.id);
-    //                PlayerPrefs.SetString("selectedPracticeName", practice.practiceName);
-    //                PlayerPrefs.SetString("selectedPracticeDescription", practice.practiceDescription);
-    //                PlayerPrefs.SetString("selectedPracticeDifficulty", practice.difficultyLevel);
-    //                PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
-    //                UnityEngine.SceneManagement.SceneManager.LoadScene("SimulationScene");
-    //            });
-    //        }
-    //    }
-    //    else
-    //    {
-    //        errorText.text = "Failed to load practices: " + request.error;
-    //        Debug.LogError(request.downloadHandler.text);
-    //    }
-    //}
+            // Load the Simulation scene
+            UnityEngine.SceneManagement.SceneManager.LoadScene("SimulationScene");
+        }
+        else
+        {
+            Debug.LogError($"Failed to create PracticeAttempt: {request.error}");
+            Debug.LogError(request.downloadHandler.text);
+            errorText.text = "Failed to start practice. Please try again.";
+        }
+    }
 
 }
 
@@ -284,4 +267,18 @@ public class ClassItem
     public string instructorName;
     public string startDate;
     public string endDate;
+}
+
+//Practice Atempt
+[System.Serializable]
+public class PracticeAttemptResponse
+{
+    public int practiceAttemptId;
+    public int sectionPracticeId;
+    public int learningRecordPartitionId;
+    public int score;
+    public string attemptDate;
+    public int attemptStatus;
+    public string description;
+    public bool isPass;
 }

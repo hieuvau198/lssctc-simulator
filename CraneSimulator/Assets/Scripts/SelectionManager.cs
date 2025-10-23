@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
 using System.Collections;
@@ -9,6 +8,7 @@ using UnityEngine.Networking;
 public class SelectionManager : MonoBehaviour
 {
     // === UI ===
+    [Header("UI References")]
     public GameObject interaction_Info_UI;
     private TextMeshProUGUI interaction_text;
     public GameObject itemInfoCard_UI; // Panel with Id, Name, Description texts
@@ -16,6 +16,10 @@ public class SelectionManager : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
     public Image componentImage;
+
+    [Header("Settings Panel")]
+    public GameObject settingsPanel; // Assign in Inspector
+    private bool settingsOpen = false;
 
     // === Player ===
     public GameObject Player;
@@ -43,6 +47,9 @@ public class SelectionManager : MonoBehaviour
         itemInfoCard_UI.SetActive(false);
         itemInfoCard_UI.transform.localScale = Vector3.zero;
 
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+
         // Setup cameras
         if (playerCamera != null) playerCamera.enabled = true;
         if (craneCamera != null) craneCamera.SetActive(false);
@@ -50,23 +57,31 @@ public class SelectionManager : MonoBehaviour
 
     void Update()
     {
-        if (itemInfoVisible)
+        // --- SETTINGS MENU TOGGLE ---
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
         {
-            if (Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.escapeKey.wasPressedThisFrame)
+            // If inspecting or controlling, close those first
+            if (itemInfoVisible)
             {
                 HideItemInfo();
+                return;
             }
-            return; // skip raycast
-        }
-
-        if (inControlMode)
-        {
-            if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            else if (inControlMode)
             {
                 ExitControlMode();
+                return;
             }
-            return; // skip raycast
+            else
+            {
+                ToggleSettingsPanel();
+                return;
+            }
         }
+
+        if (settingsOpen || itemInfoVisible || inControlMode)
+            return;
+
+        // --- Raycast for interactions ---
         Vector2 mousePos = Mouse.current.position.ReadValue();
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
         RaycastHit hit;
@@ -100,12 +115,14 @@ public class SelectionManager : MonoBehaviour
                             ShowItemInfo(interactable);
                         else
                             HideItemInfo();
+                        StartCoroutine(SubmitStepProgress(interactable.GetItemID(), "I"));
                     }
 
-                    // --- Control Mode (only if control script exists) ---
+                    // --- Control Mode (if available) ---
                     if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
                     {
                         ToggleObjectControl(interactable);
+                        StartCoroutine(SubmitStepProgress(interactable.GetItemID(), "F"));
                     }
                 }
                 else
@@ -122,29 +139,46 @@ public class SelectionManager : MonoBehaviour
         {
             ClearSelection();
         }
+    }
 
-        // Exit control mode using ESC
-        if (inControlMode && Keyboard.current.escapeKey.wasPressedThisFrame)
+    // === SETTINGS ===
+    void ToggleSettingsPanel()
+    {
+        if (settingsPanel == null)
         {
-            ExitControlMode();
+            Debug.LogWarning("Settings Panel not assigned!");
+            return;
         }
+
+        settingsOpen = !settingsOpen;
+        settingsPanel.SetActive(settingsOpen);
+
+        // Pause or resume the game
+        Time.timeScale = settingsOpen ? 0f : 1f;
+
+        // Unlock or lock the cursor
+        Cursor.lockState = settingsOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = settingsOpen;
+
+        // Disable player camera control while in settings
+        Player.SetActive(!settingsOpen);
+        interaction_Info_UI.SetActive(!settingsOpen);
+
+        Debug.Log(settingsOpen ? "Settings opened" : "Settings closed");
     }
 
     // === Control Logic ===
     void ToggleObjectControl(InteractableObject interactable)
     {
-        // Exit if already controlling this object
         if (currentControlledObject == interactable)
         {
             ExitControlMode();
             return;
         }
 
-        // Disable previous control (if any)
         if (currentControlledScript != null)
             currentControlledScript.enabled = false;
 
-        // Enable new control
         currentControlledObject = interactable;
         currentControlledScript = interactable.controlScript;
 
@@ -154,7 +188,6 @@ public class SelectionManager : MonoBehaviour
             Player.SetActive(false);
             if (craneCamera != null) craneCamera.SetActive(true);
             inControlMode = true;
-
             interaction_Info_UI.SetActive(false);
             Debug.Log($"Now controlling: {interactable.name}");
         }
@@ -235,7 +268,7 @@ public class SelectionManager : MonoBehaviour
         while (elapsed < duration)
         {
             target.localScale = Vector3.Lerp(from, to, elapsed / duration);
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         target.localScale = to;
@@ -247,7 +280,7 @@ public class SelectionManager : MonoBehaviour
         while (elapsed < duration)
         {
             target.localScale = Vector3.Lerp(from, to, elapsed / duration);
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
         target.localScale = to;
@@ -301,5 +334,73 @@ public class SelectionManager : MonoBehaviour
                 componentImage.sprite = sprite;
             }
         }
+    }
+
+    // === Submit Step API ===
+    IEnumerator SubmitStepProgress(int componentId, string actionKey)
+    {
+        int attemptId = PlayerPrefs.GetInt("practiceAttemptId", 0);
+        int userId = PlayerPrefs.GetInt("UserID", 0);
+
+        var quizManager = FindObjectOfType<PracticeQuizManager>();
+        if (quizManager == null)
+        {
+            Debug.LogError("PracticeQuizManager not found in scene!");
+            yield break;
+        }
+
+        int currentStepId = quizManager.CurrentStepId;
+        if (attemptId == 0 || userId == 0 || currentStepId == -1)
+        {
+            Debug.LogError("Missing attemptId, userId, or currentStepId!");
+            yield break;
+        }
+
+        string apiUrl = $"https://lssctc-simulation.azurewebsites.net/api/TraineePractices/attempt/{attemptId}/trainee/{userId}/submit";
+        Debug.Log($"Submitting step: {apiUrl}");
+
+        string jsonBody = JsonUtility.ToJson(new SubmitStepData
+        {
+            currentStepId = currentStepId,
+            componentId = componentId,
+            actionKey = actionKey
+        });
+
+        using (UnityWebRequest request = new UnityWebRequest(apiUrl, "POST"))
+        {
+            byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonBody);
+            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Submit failed: {request.error}\nResponse: {request.downloadHandler.text}");
+                yield break;
+            }
+
+            string response = request.downloadHandler.text.Trim();
+            Debug.Log($"Submit response: {response}");
+
+            if (response.Contains("\"message\":\"Trainee step attempt submitted successfully.\""))
+            {
+                Debug.Log("Step submission confirmed by server.");
+                quizManager.MarkStepAsDone();
+            }
+            else
+            {
+                Debug.LogWarning(" Step not marked done — server did not return success message.");
+            }
+        }
+    }
+
+    [System.Serializable]
+    public class SubmitStepData
+    {
+        public int currentStepId;
+        public int componentId;
+        public string actionKey;
     }
 }
