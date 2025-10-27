@@ -3,12 +3,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using static SelectionManager;
 
-/// <summary>
-/// Centralized API service. Put this on an object in your initial scene (e.g. "ApiService" GameObject).
-/// Uses HttpClient for async calls. All methods return Task<T>.
-/// </summary>
+
 public class ApiService : MonoBehaviour
 {
     public static ApiService Instance { get; private set; }

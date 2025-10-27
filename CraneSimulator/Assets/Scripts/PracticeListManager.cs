@@ -57,7 +57,11 @@ public class PracticeListManager : MonoBehaviour
         PlayerPrefs.Save();
 
         foreach (Transform child in contentPanel)
+        {
+            if (child.name == "HeaderPanel") continue;
             Destroy(child.gameObject);
+
+        }
 
         errorText.text = "Please select a class.";
 
@@ -68,7 +72,10 @@ public class PracticeListManager : MonoBehaviour
             {
                 errorText.text = "Please select a class.";
                 foreach (Transform child in contentPanel)
+                {
+                    if (child.name == "HeaderPanel") continue;
                     Destroy(child.gameObject);
+                }
                 return;
             }
 
@@ -86,7 +93,10 @@ public class PracticeListManager : MonoBehaviour
     {
         // clear old
         foreach (Transform child in contentPanel)
+        {
+            if (child.name == "HeaderPanel") continue; 
             Destroy(child.gameObject);
+        }
 
         errorText.text = "Loading practices...";
         var res = await ApiService.Instance.GetTraineePracticesAsync(userId, classId);

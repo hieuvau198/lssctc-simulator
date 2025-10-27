@@ -20,6 +20,11 @@ public class SelectionManager : MonoBehaviour
     public GameObject settingsPanel;
     private bool settingsOpen = false;
 
+    [Header("Crane Cameras")]
+    public Camera playerCamera;
+    public GameObject craneCamera;
+
+    [Header("Player")]
     public GameObject Player;
     public float maxInspectDistance = 3f;
 
@@ -30,10 +35,6 @@ public class SelectionManager : MonoBehaviour
     private InteractableObject currentControlledObject;
     private MonoBehaviour currentControlledScript;
     private bool inControlMode = false;
-
-    [Header("Crane Cameras")]
-    public Camera playerCamera;
-    public GameObject craneCamera;
 
     private void Start()
     {
@@ -51,28 +52,38 @@ public class SelectionManager : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            if (itemInfoVisible)
-            {
-                HideItemInfo();
-                return;
-            }
-            else if (inControlMode)
-            {
-                ExitControlMode();
-                return;
-            }
-            else
-            {
-                ToggleSettingsPanel();
-                return;
-            }
-        }
+        HandleEscapeKey();
 
+        // Don’t allow interactions if a panel is open or in control mode
         if (settingsOpen || itemInfoVisible || inControlMode)
             return;
 
+        HandleObjectSelection();
+    }
+
+    // === ESC Key Logic ===
+    void HandleEscapeKey()
+    {
+        if (!Keyboard.current.escapeKey.wasPressedThisFrame)
+            return;
+
+        if (itemInfoVisible)
+        {
+            HideItemInfo();
+        }
+        else if (inControlMode)
+        {
+            ExitControlMode();
+        }
+        else
+        {
+            ToggleSettingsPanel();
+        }
+    }
+
+    // === Object Interaction ===
+    void HandleObjectSelection()
+    {
         Vector2 mousePos = Mouse.current.position.ReadValue();
         Ray ray = Camera.main.ScreenPointToRay(mousePos);
         RaycastHit hit;
@@ -86,26 +97,13 @@ public class SelectionManager : MonoBehaviour
 
                 if (distance <= maxInspectDistance)
                 {
-                    if (currentHoveredObject != interactable)
-                    {
-                        ClearHighlight();
-                        currentHoveredObject = interactable;
-                        currentHoveredObject.Highlight(true);
-                    }
-
-                    //interaction_text.text = "Press 'E' to inspect";
-                    if (interactable.controlScript != null)
-                        //interaction_text.text += "\nPress 'F' to control";
-
+                    UpdateHoveredObject(interactable);
+                    interaction_text.text = interactable.name;
                     interaction_Info_UI.SetActive(true);
 
                     if (Keyboard.current.eKey.wasPressedThisFrame)
                     {
-                        if (!itemInfoVisible)
-                            ShowItemInfo(interactable);
-                        else
-                            HideItemInfo();
-
+                        ToggleItemInfo(interactable);
                         _ = SubmitStepProgress(interactable.GetItemID(), "I");
                     }
 
@@ -122,9 +120,22 @@ public class SelectionManager : MonoBehaviour
         else ClearSelection();
     }
 
+    void UpdateHoveredObject(InteractableObject interactable)
+    {
+        if (currentHoveredObject != interactable)
+        {
+            ClearHighlight();
+            currentHoveredObject = interactable;
+            currentHoveredObject.Highlight(true);
+        }
+    }
+
+    // === Toggle Settings ===
     void ToggleSettingsPanel()
     {
-        if (settingsPanel == null) { Debug.LogWarning("Settings Panel not assigned!"); return; }
+        // Close other panels first
+        if (itemInfoVisible) HideItemInfo();
+        if (inControlMode) ExitControlMode();
 
         settingsOpen = !settingsOpen;
         settingsPanel.SetActive(settingsOpen);
@@ -137,11 +148,21 @@ public class SelectionManager : MonoBehaviour
         interaction_Info_UI.SetActive(!settingsOpen);
     }
 
+    // === Toggle Object Control ===
     void ToggleObjectControl(InteractableObject interactable)
     {
-        if (currentControlledObject == interactable) { ExitControlMode(); return; }
+        // Prevent opening if other panel open
+        if (settingsOpen || itemInfoVisible)
+            return;
 
-        if (currentControlledScript != null) currentControlledScript.enabled = false;
+        if (currentControlledObject == interactable)
+        {
+            ExitControlMode();
+            return;
+        }
+
+        if (currentControlledScript != null)
+            currentControlledScript.enabled = false;
 
         currentControlledObject = interactable;
         currentControlledScript = interactable.controlScript;
@@ -153,21 +174,44 @@ public class SelectionManager : MonoBehaviour
             if (craneCamera != null) craneCamera.SetActive(true);
             inControlMode = true;
             interaction_Info_UI.SetActive(false);
+
+            string hint = GetHintForControl(currentControlledScript);
+            ControlHintUI.Instance?.ShowHint(hint);
         }
     }
 
     void ExitControlMode()
     {
-        if (currentControlledScript != null) currentControlledScript.enabled = false;
+        if (currentControlledScript != null)
+            currentControlledScript.enabled = false;
+
         Player.SetActive(true);
         if (craneCamera != null) craneCamera.SetActive(false);
         currentControlledObject = null;
         currentControlledScript = null;
         inControlMode = false;
+
+        ControlHintUI.Instance?.HideHint();
+    }
+
+    // === Toggle Item Info ===
+    void ToggleItemInfo(InteractableObject item)
+    {
+        if (settingsOpen || inControlMode)
+            return;
+
+        if (!itemInfoVisible)
+            ShowItemInfo(item);
+        else
+            HideItemInfo();
     }
 
     async void ShowItemInfo(InteractableObject item)
     {
+        // Close other panels
+        if (settingsOpen) ToggleSettingsPanel();
+        if (inControlMode) ExitControlMode();
+
         interaction_Info_UI.SetActive(false);
         Player.SetActive(false);
         itemInfoVisible = true;
@@ -179,6 +223,7 @@ public class SelectionManager : MonoBehaviour
         idText.text = "Loading...";
         nameText.text = "";
         descriptionText.text = "";
+        componentImage.sprite = null;
 
         int componentId = item.GetItemID();
         var data = await ApiService.Instance.GetComponentByIdAsync(componentId);
@@ -196,7 +241,6 @@ public class SelectionManager : MonoBehaviour
             idText.text = "Error";
             nameText.text = "Could not load";
             descriptionText.text = "";
-            componentImage.sprite = null;
         }
     }
 
@@ -210,6 +254,7 @@ public class SelectionManager : MonoBehaviour
         currentAnimation = StartCoroutine(ScaleAndDisable(itemInfoCard_UI.transform, Vector3.one, Vector3.zero, 0.3f));
     }
 
+    // === Helpers ===
     IEnumerator ScaleRectTransform(Transform target, Vector3 from, Vector3 to, float duration)
     {
         float elapsed = 0f;
@@ -248,10 +293,6 @@ public class SelectionManager : MonoBehaviour
     {
         ClearHighlight();
         interaction_Info_UI.SetActive(false);
-        if (currentAnimation != null) StopCoroutine(currentAnimation);
-        itemInfoCard_UI.SetActive(false);
-        itemInfoCard_UI.transform.localScale = Vector3.zero;
-        itemInfoVisible = false;
     }
 
     IEnumerator LoadImage(string url)
@@ -278,8 +319,25 @@ public class SelectionManager : MonoBehaviour
             }
         }
     }
+    string GetHintForControl(MonoBehaviour controlScript)
+    {
+        if (controlScript is BoomForward bf)
+            return $"[ {bf.extendKey} ] Extend  |  [ {bf.retractKey} ] Retract";
+        if (controlScript is BoomController bc)
+            return $"[ {bc.upBoom} ] Boom Up  |  [ {bc.downBoom} ] Boom Down";
+        if (controlScript is RotationColumn rc)
+            return $"[ {rc.leftRotationColumn} ] Rotate Left  |  [ {rc.rightRotationColumn} ] Rotate Right";
+        if (controlScript is OutTriggerLeft otl)
+            return $"[ {otl.extendKey} ] Extend Left Trigger  |  [ {otl.retractKey} ] Retract";
+        if (controlScript is OutTriggerRight otr)
+            return $"[ {otr.extendKey} ] Extend Right Trigger  |  [ {otr.retractKey} ] Retract";
+        if (controlScript is HookBlockController hook)
+            return $"[ {hook.dropKey} ] Drop Hook  |  [ {hook.retractKey} ] Raise Hook";
 
-    // Submit step using ApiService
+        return "Use assigned control keys to operate this component.";
+    }
+
+    // === Submit Step ===
     private async Task SubmitStepProgress(int componentId, string actionKey)
     {
         int attemptId = PlayerPrefs.GetInt("practiceAttemptId", 0);
@@ -313,7 +371,6 @@ public class SelectionManager : MonoBehaviour
             return;
         }
 
-        // server returned JSON with message — same check as before
         if (raw.Contains("\"message\":\"Trainee step attempt submitted successfully.\""))
         {
             Debug.Log("Step submission confirmed by server.");
@@ -324,5 +381,4 @@ public class SelectionManager : MonoBehaviour
             Debug.LogWarning("Step not marked done — server did not return success message. Response: " + raw);
         }
     }
-
 }
