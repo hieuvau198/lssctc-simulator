@@ -36,6 +36,17 @@ public class SelectionManager : MonoBehaviour
     private MonoBehaviour currentControlledScript;
     private bool inControlMode = false;
 
+    // === PANEL MANAGEMENT ===
+    private bool quizOpen = false;
+    public void RegisterPanelState(string panelName, bool open)
+    {
+        if (panelName == "quiz") quizOpen = open;
+    }
+
+    public bool IsAnyPanelOpen()
+    {
+        return settingsOpen || itemInfoVisible || inControlMode || quizOpen;
+    }
     private void Start()
     {
         interaction_text = interaction_Info_UI.GetComponent<TextMeshProUGUI>();
@@ -54,8 +65,8 @@ public class SelectionManager : MonoBehaviour
     {
         HandleEscapeKey();
 
-        // Don’t allow interactions if a panel is open or in control mode
-        if (settingsOpen || itemInfoVisible || inControlMode)
+        
+        if (IsAnyPanelOpen())
             return;
 
         HandleObjectSelection();
@@ -104,13 +115,13 @@ public class SelectionManager : MonoBehaviour
                     if (Keyboard.current.eKey.wasPressedThisFrame)
                     {
                         ToggleItemInfo(interactable);
-                        _ = SubmitStepProgress(interactable.GetItemID(), "I");
+                        //_ = SubmitStepProgress(interactable.GetItemID(), "I");
                     }
 
                     if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
                     {
                         ToggleObjectControl(interactable);
-                        _ = SubmitStepProgress(interactable.GetItemID(), "F");
+                        //_ = SubmitStepProgress(interactable.GetItemID(), "F");
                     }
                 }
                 else ClearSelection();
@@ -133,6 +144,8 @@ public class SelectionManager : MonoBehaviour
     // === Toggle Settings ===
     void ToggleSettingsPanel()
     {
+
+        if (IsAnyPanelOpen() && !settingsOpen) return;
         // Close other panels first
         if (itemInfoVisible) HideItemInfo();
         if (inControlMode) ExitControlMode();
@@ -151,8 +164,7 @@ public class SelectionManager : MonoBehaviour
     // === Toggle Object Control ===
     void ToggleObjectControl(InteractableObject interactable)
     {
-        // Prevent opening if other panel open
-        if (settingsOpen || itemInfoVisible)
+        if (IsAnyPanelOpen() && !inControlMode)
             return;
 
         if (currentControlledObject == interactable)
@@ -197,7 +209,7 @@ public class SelectionManager : MonoBehaviour
     // === Toggle Item Info ===
     void ToggleItemInfo(InteractableObject item)
     {
-        if (settingsOpen || inControlMode)
+        if (IsAnyPanelOpen() && !itemInfoVisible)
             return;
 
         if (!itemInfoVisible)

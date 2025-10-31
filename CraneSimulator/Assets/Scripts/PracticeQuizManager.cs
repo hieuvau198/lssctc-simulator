@@ -17,7 +17,7 @@ public class PracticeQuizManager : MonoBehaviour
 
     private TraineePracticeStep[] steps;
     private int currentIndex = 0;
-
+    private SelectionManager selectionManager;
     private const string CURRENT_STEP_KEY = "CurrentStepId";
     public int CurrentStepId => (steps != null && currentIndex < steps.Length) ? steps[currentIndex].stepId : -1;
 
@@ -25,13 +25,18 @@ public class PracticeQuizManager : MonoBehaviour
     {
         quizPanel.SetActive(false);
         _ = FetchSteps();
+        selectionManager = FindObjectOfType<SelectionManager>();
     }
 
     void Update()
     {
+        bool isQuizActive = quizPanel.activeSelf;
+        if (!isQuizActive && selectionManager != null && selectionManager.IsAnyPanelOpen())
+            return;
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             quizPanel.SetActive(!quizPanel.activeSelf);
+            selectionManager?.RegisterPanelState("quiz", quizPanel.activeSelf);
             if (quizPanel.activeSelf && steps != null && steps.Length > 0)
                 ShowStep(currentIndex, true);
         }

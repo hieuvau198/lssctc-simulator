@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class FinishAttempt : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class FinishAttempt : MonoBehaviour
             Debug.Log("[DEBUG] Attempt completed: " + raw);
             PlayerPrefs.DeleteKey("practiceAttemptId");
             PlayerPrefs.Save();
+            SceneManager.LoadScene("PracticeListScene");
             // optionally load menu or show success UI
         }
         else
