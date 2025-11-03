@@ -115,13 +115,16 @@ public class SelectionManager : MonoBehaviour
                     if (Keyboard.current.eKey.wasPressedThisFrame)
                     {
                         ToggleItemInfo(interactable);
-                        //_ = SubmitStepProgress(interactable.GetItemID(), "I");
+                        var taskManager = FindObjectOfType<PracticeTaskManager>();
+                        if (taskManager != null)
+                        {
+                            taskManager.MarkTaskAsDone(interactable.GetItemID());
+                        }
                     }
 
                     if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
                     {
                         ToggleObjectControl(interactable);
-                        //_ = SubmitStepProgress(interactable.GetItemID(), "F");
                     }
                 }
                 else ClearSelection();
@@ -349,48 +352,5 @@ public class SelectionManager : MonoBehaviour
         return "Use assigned control keys to operate this component.";
     }
 
-    // === Submit Step ===
-    private async Task SubmitStepProgress(int componentId, string actionKey)
-    {
-        int attemptId = PlayerPrefs.GetInt("practiceAttemptId", 0);
-        int userId = PlayerPrefs.GetInt("UserID", 0);
-
-        var quizManager = FindObjectOfType<PracticeQuizManager>();
-        if (quizManager == null)
-        {
-            Debug.LogError("PracticeQuizManager not found in scene!");
-            return;
-        }
-
-        int currentStepId = quizManager.CurrentStepId;
-        if (attemptId == 0 || userId == 0 || currentStepId == -1)
-        {
-            Debug.LogError("Missing attemptId, userId, or currentStepId!");
-            return;
-        }
-
-        var dto = new SubmitStepData
-        {
-            currentStepId = currentStepId,
-            componentId = componentId,
-            actionKey = actionKey
-        };
-
-        string raw = await ApiService.Instance.SubmitStepAsync(attemptId, userId, dto);
-        if (string.IsNullOrEmpty(raw))
-        {
-            Debug.LogError("Submit failed or empty response");
-            return;
-        }
-
-        if (raw.Contains("\"message\":\"Trainee step attempt submitted successfully.\""))
-        {
-            Debug.Log("Step submission confirmed by server.");
-            quizManager.MarkStepAsDone();
-        }
-        else
-        {
-            Debug.LogWarning("Step not marked done — server did not return success message. Response: " + raw);
-        }
-    }
+    
 }
