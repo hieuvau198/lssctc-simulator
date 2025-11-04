@@ -8,7 +8,7 @@ public class CraneHook : MonoBehaviour
     public float ropeWidth = 0.04f;
 
     [Header("Cargo Detection")]
-    public float attachDistance = 2f;         // Detection range below hook
+    public float attachDistance = 0.5f;         // Detection range below hook
     public LayerMask cargoLayer;              // Layer for cargo objects
     public KeyCode attachKey = KeyCode.B;     // Press to attach/detach
 
@@ -89,7 +89,7 @@ public class CraneHook : MonoBehaviour
         cargoJoint.configuredInWorldSpace = false;
 
         SoftJointLimit limit = new SoftJointLimit();
-        limit.limit = 1.5f; // small flexibility in rope
+        limit.limit = 0.75f; // small flexibility in rope
         cargoJoint.linearLimit = limit;
 
         JointDrive drive = new JointDrive
