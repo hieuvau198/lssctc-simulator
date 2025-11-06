@@ -96,7 +96,8 @@ public class CraneHook : MonoBehaviour
         {
             positionSpring = 60f,
             positionDamper = 8f,
-            maximumForce = 4000f
+            maximumForce = 10000f
+
         };
         cargoJoint.xDrive = drive;
         cargoJoint.yDrive = drive;

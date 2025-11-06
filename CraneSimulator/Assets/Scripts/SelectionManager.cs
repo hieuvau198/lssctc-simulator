@@ -1,16 +1,15 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.InputSystem;
-using System.Threading.Tasks;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Threading.Tasks;
 
 public class SelectionManager : MonoBehaviour
 {
     [Header("UI References")]
-    public GameObject interaction_Info_UI;
-    private TextMeshProUGUI interaction_text;
-    public GameObject itemInfoCard_UI;
+    public GameObject interactionInfoUI;
+    public GameObject itemInfoCardUI;
     public TextMeshProUGUI idText;
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descriptionText;
@@ -18,236 +17,214 @@ public class SelectionManager : MonoBehaviour
 
     [Header("Settings Panel")]
     public GameObject settingsPanel;
-    private bool settingsOpen = false;
 
-    [Header("Crane Cameras")]
+    [Header("Cameras")]
     public Camera playerCamera;
     public GameObject craneCamera;
 
     [Header("Player")]
-    public GameObject Player;
+    public GameObject player;
     public float maxInspectDistance = 3f;
 
-    private InteractableObject currentHoveredObject;
-    private bool itemInfoVisible = false;
+    private TextMeshProUGUI interactionText;
     private Coroutine currentAnimation;
 
-    private InteractableObject currentControlledObject;
-    private MonoBehaviour currentControlledScript;
-    private bool inControlMode = false;
+    private InteractableObject hoveredObject;
+    private InteractableObject controlledObject;
+    private MonoBehaviour controlledScript;
 
-    // === PANEL MANAGEMENT ===
-    private bool quizOpen = false;
-    public void RegisterPanelState(string panelName, bool open)
+    private bool isItemInfoVisible;
+    private bool isControlMode;
+    private bool isSettingsOpen;
+    private bool isQuizOpen;
+    private bool isTaskOpen;
+
+    // =========================== //
+    // ==== Unity Life Cycle  ==== //
+    // =========================== //
+    private void Start()
     {
-        if (panelName == "quiz") quizOpen = open;
+        interactionText = interactionInfoUI.GetComponent<TextMeshProUGUI>();
+
+        interactionInfoUI.SetActive(false);
+        itemInfoCardUI.SetActive(false);
+        itemInfoCardUI.transform.localScale = Vector3.zero;
+
+        settingsPanel?.SetActive(false);
+        playerCamera.enabled = true;
+        craneCamera?.SetActive(false);
+    }
+
+    private void Update()
+    {
+        HandleEscapeKey();
+        HandleObjectSelection();
+    }
+
+    // =========================== //
+    // ==== Panel Management  ==== //
+    // =========================== //
+    public void RegisterPanelState(string panelName, bool isOpen)
+    {
+        switch (panelName)
+        {
+            case "quiz": isQuizOpen = isOpen; break;
+            case "task": isTaskOpen = isOpen; break;
+            case "settings": isSettingsOpen = isOpen; break;
+        }
     }
 
     public bool IsAnyPanelOpen()
     {
-        return settingsOpen || itemInfoVisible || inControlMode || quizOpen;
-    }
-    private void Start()
-    {
-        interaction_text = interaction_Info_UI.GetComponent<TextMeshProUGUI>();
-        interaction_Info_UI.SetActive(false);
-        itemInfoCard_UI.SetActive(false);
-        itemInfoCard_UI.transform.localScale = Vector3.zero;
-
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
-
-        if (playerCamera != null) playerCamera.enabled = true;
-        if (craneCamera != null) craneCamera.SetActive(false);
+        // Settings panel doesn’t block other panels
+        return isItemInfoVisible || isQuizOpen || isTaskOpen;
     }
 
-    void Update()
+    // =========================== //
+    // ==== Input Handling   ==== //
+    // =========================== //
+    private void HandleEscapeKey()
     {
-        HandleEscapeKey();
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            ToggleSettingsPanel();
 
-        
-        if (IsAnyPanelOpen())
+        if (isControlMode && Keyboard.current.fKey.wasPressedThisFrame)
+            ExitControlMode();
+    }
+
+    private void HandleObjectSelection()
+    {
+        if (isControlMode)
             return;
-
-        HandleObjectSelection();
-    }
-
-    // === ESC Key Logic ===
-    void HandleEscapeKey()
-    {
-        if (!Keyboard.current.escapeKey.wasPressedThisFrame)
-            return;
-
-        if (itemInfoVisible)
+        // Close info panel if visible
+        if (isItemInfoVisible && Keyboard.current.eKey.wasPressedThisFrame)
         {
             HideItemInfo();
+            return;
         }
-        else if (inControlMode)
-        {
-            ExitControlMode();
-        }
-        else
-        {
-            ToggleSettingsPanel();
-        }
-    }
 
-    // === Object Interaction ===
-    void HandleObjectSelection()
-    {
-        Vector2 mousePos = Mouse.current.position.ReadValue();
-        Ray ray = Camera.main.ScreenPointToRay(mousePos);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            var interactable = hit.transform.GetComponent<InteractableObject>();
-            if (interactable != null)
-            {
-                float distance = Vector3.Distance(Player.transform.position, interactable.transform.position);
-
-                if (distance <= maxInspectDistance)
-                {
-                    UpdateHoveredObject(interactable);
-                    interaction_text.text = interactable.name;
-                    interaction_Info_UI.SetActive(true);
-
-                    if (Keyboard.current.eKey.wasPressedThisFrame)
-                    {
-                        ToggleItemInfo(interactable);
-                        var taskManager = FindObjectOfType<PracticeTaskManager>();
-                        if (taskManager != null)
-                        {
-                            taskManager.MarkTaskAsDone(interactable.GetItemID());
-                        }
-                    }
-
-                    if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
-                    {
-                        ToggleObjectControl(interactable);
-                    }
-                }
-                else ClearSelection();
-            }
-            else ClearSelection();
-        }
-        else ClearSelection();
-    }
-
-    void UpdateHoveredObject(InteractableObject interactable)
-    {
-        if (currentHoveredObject != interactable)
-        {
-            ClearHighlight();
-            currentHoveredObject = interactable;
-            currentHoveredObject.Highlight(true);
-        }
-    }
-
-    // === Toggle Settings ===
-    void ToggleSettingsPanel()
-    {
-
-        if (IsAnyPanelOpen() && !settingsOpen) return;
-        // Close other panels first
-        if (itemInfoVisible) HideItemInfo();
-        if (inControlMode) ExitControlMode();
-
-        settingsOpen = !settingsOpen;
-        settingsPanel.SetActive(settingsOpen);
-
-        Time.timeScale = settingsOpen ? 0f : 1f;
-        Cursor.lockState = settingsOpen ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = settingsOpen;
-
-        Player.SetActive(!settingsOpen);
-        interaction_Info_UI.SetActive(!settingsOpen);
-    }
-
-    // === Toggle Object Control ===
-    void ToggleObjectControl(InteractableObject interactable)
-    {
-        if (IsAnyPanelOpen() && !inControlMode)
+        // Prevent interaction if other panels are open
+        if (IsAnyPanelOpen() && !isControlMode)
             return;
 
-        if (currentControlledObject == interactable)
+        if (!Camera.main) return;
+
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+        if (!Physics.Raycast(ray, out RaycastHit hit))
+        {
+            ClearSelection();
+            return;
+        }
+
+        InteractableObject interactable = hit.transform.GetComponent<InteractableObject>();
+        if (interactable == null)
+        {
+            ClearSelection();
+            return;
+        }
+
+        float distance = Vector3.Distance(player.transform.position, interactable.transform.position);
+        if (distance > maxInspectDistance)
+        {
+            ClearSelection();
+            return;
+        }
+
+        UpdateHoveredObject(interactable);
+        interactionText.text = interactable.name;
+        interactionInfoUI.SetActive(true);
+
+        // === Press E to Inspect ===
+        if (Keyboard.current.eKey.wasPressedThisFrame)
+            ShowItemInfo(interactable);
+
+        // === Press F to Control ===
+        if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
+            ToggleObjectControl(interactable);
+    }
+
+    // =========================== //
+    // ==== Settings Toggle  ==== //
+    // =========================== //
+    private void ToggleSettingsPanel()
+    {
+        isSettingsOpen = !isSettingsOpen;
+        settingsPanel.SetActive(isSettingsOpen);
+        RegisterPanelState("settings", isSettingsOpen);
+
+        Time.timeScale = isSettingsOpen ? 0f : 1f;
+        Cursor.lockState = isSettingsOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = isSettingsOpen;
+
+        player.SetActive(!isSettingsOpen);
+        interactionInfoUI.SetActive(!isSettingsOpen);
+    }
+
+    // =========================== //
+    // ==== Control Handling  ==== //
+    // =========================== //
+    private void ToggleObjectControl(InteractableObject interactable)
+    {
+        if (controlledObject == interactable)
         {
             ExitControlMode();
             return;
         }
 
-        if (currentControlledScript != null)
-            currentControlledScript.enabled = false;
+        if (controlledScript != null)
+            controlledScript.enabled = false;
 
-        currentControlledObject = interactable;
-        currentControlledScript = interactable.controlScript;
+        controlledObject = interactable;
+        controlledScript = interactable.controlScript;
 
-        if (currentControlledScript != null)
-        {
-            currentControlledScript.enabled = true;
-            Player.SetActive(false);
-            if (craneCamera != null) craneCamera.SetActive(true);
-            inControlMode = true;
-            interaction_Info_UI.SetActive(false);
+        if (controlledScript == null) return;
 
-            string hint = GetHintForControl(currentControlledScript);
-            ControlHintUI.Instance?.ShowHint(hint);
-        }
+        controlledScript.enabled = true;
+        craneCamera?.SetActive(true);
+        isControlMode = true;
+        interactionInfoUI.SetActive(false);
+
+        string hint = GetHintForControl(controlledScript);
+        ControlHintUI.Instance?.ShowHint(hint);
     }
 
-    void ExitControlMode()
+    private void ExitControlMode()
     {
-        if (currentControlledScript != null)
-            currentControlledScript.enabled = false;
+        if (controlledScript != null)
+            controlledScript.enabled = false;
 
-        Player.SetActive(true);
-        if (craneCamera != null) craneCamera.SetActive(false);
-        currentControlledObject = null;
-        currentControlledScript = null;
-        inControlMode = false;
+        craneCamera?.SetActive(false);
+        controlledObject = null;
+        controlledScript = null;
+        isControlMode = false;
 
         ControlHintUI.Instance?.HideHint();
     }
 
-    // === Toggle Item Info ===
-    void ToggleItemInfo(InteractableObject item)
+    // =========================== //
+    // ==== Item Info Panel  ==== //
+    // =========================== //
+    private async void ShowItemInfo(InteractableObject item)
     {
-        if (IsAnyPanelOpen() && !itemInfoVisible)
-            return;
-
-        if (!itemInfoVisible)
-            ShowItemInfo(item);
-        else
-            HideItemInfo();
-    }
-
-    async void ShowItemInfo(InteractableObject item)
-    {
-        // Close other panels
-        if (settingsOpen) ToggleSettingsPanel();
-        if (inControlMode) ExitControlMode();
-
-        interaction_Info_UI.SetActive(false);
-        Player.SetActive(false);
-        itemInfoVisible = true;
+        interactionInfoUI.SetActive(false);
+        player.SetActive(false);
+        isItemInfoVisible = true;
 
         if (currentAnimation != null) StopCoroutine(currentAnimation);
-        itemInfoCard_UI.SetActive(true);
-        currentAnimation = StartCoroutine(ScaleRectTransform(itemInfoCard_UI.transform, Vector3.zero, Vector3.one, 0.3f));
+        itemInfoCardUI.SetActive(true);
+        currentAnimation = StartCoroutine(ScaleRectTransform(itemInfoCardUI.transform, Vector3.zero, Vector3.one, 0.3f));
 
         idText.text = "Loading...";
-        nameText.text = "";
-        descriptionText.text = "";
+        nameText.text = descriptionText.text = "";
         componentImage.sprite = null;
 
-        int componentId = item.GetItemID();
-        var data = await ApiService.Instance.GetComponentByIdAsync(componentId);
+        var data = await ApiService.Instance.GetComponentByIdAsync(item.GetItemID());
 
         if (data != null)
         {
-            idText.text = "ID: " + data.id;
-            nameText.text = "Name: " + data.name;
-            descriptionText.text = "Description: " + data.description;
+            idText.text = $"ID: {data.id}";
+            nameText.text = $"Name: {data.name}";
+            descriptionText.text = $"Description: {data.description}";
             if (!string.IsNullOrEmpty(data.imageUrl))
                 StartCoroutine(LoadImage(data.imageUrl));
         }
@@ -259,18 +236,20 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
-    void HideItemInfo()
+    private void HideItemInfo()
     {
-        interaction_Info_UI.SetActive(true);
-        Player.SetActive(true);
-        itemInfoVisible = false;
+        interactionInfoUI.SetActive(true);
+        player.SetActive(true);
+        isItemInfoVisible = false;
 
         if (currentAnimation != null) StopCoroutine(currentAnimation);
-        currentAnimation = StartCoroutine(ScaleAndDisable(itemInfoCard_UI.transform, Vector3.one, Vector3.zero, 0.3f));
+        currentAnimation = StartCoroutine(ScaleAndDisable(itemInfoCardUI.transform, Vector3.one, Vector3.zero, 0.3f));
     }
 
-    // === Helpers ===
-    IEnumerator ScaleRectTransform(Transform target, Vector3 from, Vector3 to, float duration)
+    // =========================== //
+    // ==== UI Animation  ==== //
+    // =========================== //
+    private IEnumerator ScaleRectTransform(Transform target, Vector3 from, Vector3 to, float duration)
     {
         float elapsed = 0f;
         while (elapsed < duration)
@@ -282,75 +261,72 @@ public class SelectionManager : MonoBehaviour
         target.localScale = to;
     }
 
-    IEnumerator ScaleAndDisable(Transform target, Vector3 from, Vector3 to, float duration)
+    private IEnumerator ScaleAndDisable(Transform target, Vector3 from, Vector3 to, float duration)
     {
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            target.localScale = Vector3.Lerp(from, to, elapsed / duration);
-            elapsed += Time.unscaledDeltaTime;
-            yield return null;
-        }
-        target.localScale = to;
-        itemInfoCard_UI.SetActive(false);
+        yield return ScaleRectTransform(target, from, to, duration);
+        itemInfoCardUI.SetActive(false);
     }
 
-    void ClearHighlight()
+    // =========================== //
+    // ==== Utility Helpers  ==== //
+    // =========================== //
+    private void UpdateHoveredObject(InteractableObject interactable)
     {
-        if (currentHoveredObject != null)
-        {
-            currentHoveredObject.Highlight(false);
-            currentHoveredObject = null;
-        }
+        if (hoveredObject == interactable) return;
+        ClearHighlight();
+        hoveredObject = interactable;
+        hoveredObject.Highlight(true);
     }
 
-    void ClearSelection()
+    private void ClearHighlight()
+    {
+        if (hoveredObject == null) return;
+        hoveredObject.Highlight(false);
+        hoveredObject = null;
+    }
+
+    private void ClearSelection()
     {
         ClearHighlight();
-        interaction_Info_UI.SetActive(false);
+        interactionInfoUI.SetActive(false);
     }
 
-    IEnumerator LoadImage(string url)
+    private IEnumerator LoadImage(string url)
     {
         if (componentImage == null)
         {
-            Debug.LogError("No UI Image assigned to SelectionManager.componentImage!");
+            Debug.LogError("No componentImage assigned!");
             yield break;
         }
 
-        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
         {
-            yield return request.SendWebRequest();
-
-            if (request.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError("Image load failed: " + request.error);
-            }
-            else
-            {
-                Texture2D texture = DownloadHandlerTexture.GetContent(request);
-                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                componentImage.sprite = sprite;
-            }
+            Debug.LogError("Image load failed: " + request.error);
+            yield break;
         }
+
+        Texture2D texture = DownloadHandlerTexture.GetContent(request);
+        componentImage.sprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, texture.width, texture.height),
+            new Vector2(0.5f, 0.5f)
+        );
     }
-    string GetHintForControl(MonoBehaviour controlScript)
+
+    private string GetHintForControl(MonoBehaviour script)
     {
-        if (controlScript is BoomForward bf)
-            return $"[ {bf.extendKey} ] Extend  |  [ {bf.retractKey} ] Retract";
-        if (controlScript is BoomController bc)
-            return $"[ {bc.upBoom} ] Boom Up  |  [ {bc.downBoom} ] Boom Down";
-        if (controlScript is RotationColumn rc)
-            return $"[ {rc.leftRotationColumn} ] Rotate Left  |  [ {rc.rightRotationColumn} ] Rotate Right";
-        if (controlScript is OutTriggerLeft otl)
-            return $"[ {otl.extendKey} ] Extend Left Trigger  |  [ {otl.retractKey} ] Retract";
-        if (controlScript is OutTriggerRight otr)
-            return $"[ {otr.extendKey} ] Extend Right Trigger  |  [ {otr.retractKey} ] Retract";
-        if (controlScript is HookBlockController hook)
-            return $"[ {hook.dropKey} ] Drop Hook  |  [ {hook.retractKey} ] Raise Hook";
-
-        return "Use assigned control keys to operate this component.";
+        return script switch
+        {
+            BoomForward bf => $"[ {bf.extendKey} ] Extend  |  [ {bf.retractKey} ] Retract",
+            BoomController bc => $"[ {bc.upBoom} ] Boom Up  |  [ {bc.downBoom} ] Boom Down",
+            RotationColumn rc => $"[ {rc.leftRotationColumn} ] Rotate Left  |  [ {rc.rightRotationColumn} ] Rotate Right",
+            OutTriggerLeft otl => $"[ {otl.extendKey} ] Extend Left Trigger  |  [ {otl.retractKey} ] Retract",
+            OutTriggerRight otr => $"[ {otr.extendKey} ] Extend Right Trigger  |  [ {otr.retractKey} ] Retract",
+            HookBlockController hook => $"[ {hook.dropKey} ] Drop Hook  |  [ {hook.retractKey} ] Raise Hook",
+            _ => "Use assigned control keys to operate this component."
+        };
     }
-
-    
 }

@@ -2,7 +2,6 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 public class PracticeListManager : MonoBehaviour
 {
@@ -10,104 +9,72 @@ public class PracticeListManager : MonoBehaviour
     public GameObject practiceCardPrefab;
     public Transform contentPanel;
     public TextMeshProUGUI errorText;
-    public TMP_Dropdown classDropdown;
 
-    private int userId;
-    private List<ClassItem> classesCache;
-
-    async void Start()
+    // Local data model
+    [System.Serializable]
+    public class PracticeItem
     {
-        userId = PlayerPrefs.GetInt("UserID", 0);
-        if (userId == 0)
-        {
-            errorText.text = "User ID not found in PlayerPrefs.";
-            return;
-        }
-
-        await LoadClasses();
+        public int practiceId;
+        public string practiceName;
+        public string practiceDescription;
+        public int estimatedDurationMinutes;
+        public string difficultyLevel;
+        public string sceneName; 
     }
 
-    private async Task LoadClasses()
+    // Local dummy data
+    private List<PracticeItem> localPractices = new List<PracticeItem>()
     {
-        var res = await ApiService.Instance.GetMyClassesAsync(userId);
-        if (res == null || res.items == null || res.items.Count == 0)
-        {
-            errorText.text = "No classes found for this user.";
-            return;
-        }
+        new PracticeItem {
+            practiceId = 1,
+            practiceName = "Hook Operation",
+            practiceDescription = "Learn to attach and lift cargo correctly.",
+            estimatedDurationMinutes = 10,
+            difficultyLevel = "Beginner",
+            sceneName = "Practice1" 
+        },
+        new PracticeItem {
+            practiceId = 2,
+            practiceName = "Crane Movement",
+            practiceDescription = "Control the crane and move loads safely.",
+            estimatedDurationMinutes = 15,
+            difficultyLevel = "Intermediate",
+            sceneName = "Practice2"
+        },
+        
+        // new PracticeItem {
+        //     practiceId = 3,
+        //     practiceName = "Precision Challenge",
+        //     practiceDescription = "Place the load accurately into position.",
+        //     estimatedDurationMinutes = 20,
+        //     difficultyLevel = "Advanced",
+        //     sceneName = "PrecisionChallengeScene"
+        // }
+    };
 
-        classesCache = res.items;
-        PopulateDropdown(classesCache);
+    void Start()
+    {
+        LoadLocalPractices();
     }
 
-    void PopulateDropdown(List<ClassItem> classes)
+    private void LoadLocalPractices()
     {
-        classDropdown.ClearOptions();
-
-        List<string> classNames = new List<string>() { "Select a class" };
-        foreach (var c in classes)
-            classNames.Add(c.className);
-
-        classDropdown.AddOptions(classNames);
-
-        // Reset PlayerPrefs
-        PlayerPrefs.DeleteKey("SelectedClassId");
-        PlayerPrefs.DeleteKey("SelectedClassName");
-        PlayerPrefs.DeleteKey("SelectedCourseName");
-        PlayerPrefs.Save();
-
+        // Clear old cards (except header)
         foreach (Transform child in contentPanel)
         {
             if (child.name == "HeaderPanel") continue;
             Destroy(child.gameObject);
-
         }
 
-        errorText.text = "Please select a class.";
-
-        classDropdown.onValueChanged.RemoveAllListeners();
-        classDropdown.onValueChanged.AddListener((index) =>
+        if (localPractices == null || localPractices.Count == 0)
         {
-            if (index == 0)
-            {
-                errorText.text = "Please select a class.";
-                foreach (Transform child in contentPanel)
-                {
-                    if (child.name == "HeaderPanel") continue;
-                    Destroy(child.gameObject);
-                }
-                return;
-            }
-
-            ClassItem selected = classes[index - 1];
-            PlayerPrefs.SetInt("SelectedClassId", selected.classId);
-            PlayerPrefs.SetString("SelectedClassName", selected.className);
-            PlayerPrefs.SetString("SelectedCourseName", selected.courseName);
-            PlayerPrefs.Save();
-
-            _ = LoadPractices(selected.classId);
-        });
-    }
-
-    private async Task LoadPractices(int classId)
-    {
-        // clear old
-        foreach (Transform child in contentPanel)
-        {
-            if (child.name == "HeaderPanel") continue; 
-            Destroy(child.gameObject);
-        }
-
-        errorText.text = "Loading practices...";
-        var res = await ApiService.Instance.GetTraineePracticesAsync(userId, classId);
-        if (res == null || res.items == null || res.items.Count == 0)
-        {
-            errorText.text = "No practices available for this class.";
+            errorText.text = "No practices available.";
             return;
         }
 
         errorText.text = "";
-        foreach (var practice in res.items)
+
+        foreach (var practice in localPractices)
         {
             GameObject card = Instantiate(practiceCardPrefab, contentPanel);
 
@@ -115,7 +82,7 @@ public class PracticeListManager : MonoBehaviour
             TextMeshProUGUI descText = card.transform.Find("PracticeDescriptionText").GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI durationText = card.transform.Find("PracticeDurationText").GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI difficultyText = card.transform.Find("PracticeDifficultyText").GetComponent<TextMeshProUGUI>();
-            UnityEngine.UI.Button startButton = card.transform.Find("StartButton").GetComponent<UnityEngine.UI.Button>();
+            Button startButton = card.transform.Find("StartButton").GetComponent<Button>();
 
             nameText.text = practice.practiceName;
             descText.text = practice.practiceDescription;
@@ -131,23 +98,9 @@ public class PracticeListManager : MonoBehaviour
                 PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
                 PlayerPrefs.Save();
 
-                _ = StartPracticeAttempt(practice.sectionPracticeId);
+                // Load each practice’s own scene
+                UnityEngine.SceneManagement.SceneManager.LoadScene(practice.sceneName);
             });
         }
-    }
-
-    private async Task StartPracticeAttempt(int sectionPracticeId)
-    {
-        var attempt = await ApiService.Instance.CreatePracticeAttemptAsync(sectionPracticeId, userId);
-        if (attempt == null)
-        {
-            errorText.text = "Failed to start practice. Please try again.";
-            return;
-        }
-
-        PlayerPrefs.SetInt("practiceAttemptId", attempt.practiceAttemptId);
-        PlayerPrefs.Save();
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene("SimulationScene");
     }
 }

@@ -26,9 +26,25 @@ public class PracticeTaskManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            bool active = !taskPanel.activeSelf;
-            taskPanel.SetActive(active);
-            selectionManager?.RegisterPanelState("task", active);
+            // If the panel is open, close it
+            if (taskPanel.activeSelf)
+            {
+                taskPanel.SetActive(false);
+                selectionManager?.RegisterPanelState("task", false);
+            }
+            else
+            {
+                // Check if another panel is already open
+                if (selectionManager != null && selectionManager.IsAnyPanelOpen())
+                {
+                    Debug.Log("Cannot open task panel — another panel is already open.");
+                    return;
+                }
+
+                // Open the panel
+                taskPanel.SetActive(true);
+                selectionManager?.RegisterPanelState("task", true);
+            }
         }
     }
 
