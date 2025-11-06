@@ -57,7 +57,6 @@ public class SelectionManager : MonoBehaviour
 
     private void Update()
     {
-        HandleEscapeKey();
         HandleObjectSelection();
     }
 
@@ -80,31 +79,29 @@ public class SelectionManager : MonoBehaviour
         return isItemInfoVisible || isQuizOpen || isTaskOpen;
     }
 
-    // =========================== //
-    // ==== Input Handling   ==== //
-    // =========================== //
-    private void HandleEscapeKey()
-    {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            ToggleSettingsPanel();
-
-        if (isControlMode && Keyboard.current.fKey.wasPressedThisFrame)
-            ExitControlMode();
-    }
+    
 
     private void HandleObjectSelection()
     {
-        if (isControlMode)
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+            ToggleSettingsPanel();
+        if (isControlMode && Keyboard.current.fKey.wasPressedThisFrame)
+        {
+            ExitControlMode();
             return;
-        // Close info panel if visible
+        }
         if (isItemInfoVisible && Keyboard.current.eKey.wasPressedThisFrame)
         {
             HideItemInfo();
             return;
         }
-
+        if (isControlMode)
+        {
+            ClearSelection(); // remove any hovered highlight
+            return;
+        }
         // Prevent interaction if other panels are open
-        if (IsAnyPanelOpen() && !isControlMode)
+        if (IsAnyPanelOpen())
             return;
 
         if (!Camera.main) return;
@@ -165,20 +162,14 @@ public class SelectionManager : MonoBehaviour
     // =========================== //
     private void ToggleObjectControl(InteractableObject interactable)
     {
-        if (controlledObject == interactable)
-        {
-            ExitControlMode();
-            return;
-        }
 
         if (controlledScript != null)
             controlledScript.enabled = false;
-
         controlledObject = interactable;
         controlledScript = interactable.controlScript;
 
         if (controlledScript == null) return;
-
+        player.SetActive(false);
         controlledScript.enabled = true;
         craneCamera?.SetActive(true);
         isControlMode = true;
@@ -192,7 +183,7 @@ public class SelectionManager : MonoBehaviour
     {
         if (controlledScript != null)
             controlledScript.enabled = false;
-
+        player.SetActive(true);
         craneCamera?.SetActive(false);
         controlledObject = null;
         controlledScript = null;

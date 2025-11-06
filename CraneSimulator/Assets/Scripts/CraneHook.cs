@@ -13,9 +13,7 @@ public class CraneHook : MonoBehaviour
     public KeyCode attachKey = KeyCode.B;     // Press to attach/detach
 
     [Header("Joint Physics")]
-    public float jointSpring = 60f;           // Tension stiffness
-    public float jointDamping = 8f;           // Rope damping
-    public float breakForce = 4000f;         // Optional break force
+    public float breakForce = Mathf.Infinity;         // Optional break force
 
     private GameObject connectedCargo;
     private LineRenderer cargoRopes;
@@ -84,9 +82,9 @@ public class CraneHook : MonoBehaviour
         cargoJoint.angularZMotion = ConfigurableJointMotion.Free;
 
         cargoJoint.autoConfigureConnectedAnchor = false;
-        //cargoJoint.connectedAnchor = hookAttachPoint.localPosition;
-        //cargoJoint.anchor = Vector3.zero;
-        cargoJoint.configuredInWorldSpace = false;
+        cargoJoint.connectedAnchor = hookAttachPoint.localPosition;
+        cargoJoint.anchor = Vector3.zero;
+        cargoJoint.configuredInWorldSpace = true;
 
         SoftJointLimit limit = new SoftJointLimit();
         limit.limit = 0.75f; // small flexibility in rope
