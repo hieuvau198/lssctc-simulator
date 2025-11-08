@@ -30812,7 +30812,7 @@ PrefabInstance:
       objectReference: {fileID: 283908440}
     - target: {fileID: 1479741796872391847, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2201756110881499393, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
       propertyPath: controlScript
@@ -30844,6 +30844,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4138744194638117714, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4143197830266230851, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4858520255038351094, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}

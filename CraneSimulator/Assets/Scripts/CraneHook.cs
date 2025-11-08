@@ -73,6 +73,9 @@ public class CraneHook : MonoBehaviour
         cargoJoint = connectedCargo.AddComponent<ConfigurableJoint>();
         cargoJoint.connectedBody = hookRb;
 
+        cargoJoint.anchor = Vector3.zero;
+        cargoJoint.connectedAnchor = hookAttachPoint.localPosition;
+
         cargoJoint.xMotion = ConfigurableJointMotion.Limited;
         cargoJoint.yMotion = ConfigurableJointMotion.Limited;
         cargoJoint.zMotion = ConfigurableJointMotion.Limited;
@@ -82,8 +85,6 @@ public class CraneHook : MonoBehaviour
         cargoJoint.angularZMotion = ConfigurableJointMotion.Free;
 
         cargoJoint.autoConfigureConnectedAnchor = false;
-        cargoJoint.connectedAnchor = hookAttachPoint.localPosition;
-        cargoJoint.anchor = Vector3.zero;
         cargoJoint.configuredInWorldSpace = true;
 
         SoftJointLimit limit = new SoftJointLimit();
@@ -101,8 +102,8 @@ public class CraneHook : MonoBehaviour
         cargoJoint.yDrive = drive;
         cargoJoint.zDrive = drive;
 
-        cargoJoint.breakForce = breakForce;
-        cargoJoint.breakTorque = breakForce;
+        cargoJoint.breakForce = float.PositiveInfinity;
+        cargoJoint.breakTorque = float.PositiveInfinity;
 
         // --- Setup visual ropes ---
         cargoPoints[0] = cargo.pointLineCargo1;
