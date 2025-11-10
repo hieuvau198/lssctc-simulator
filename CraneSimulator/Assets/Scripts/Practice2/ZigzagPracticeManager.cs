@@ -9,7 +9,7 @@ public class ZigzagPracticeManager : MonoBehaviour
     public List<Transform> waypoints;
 
     [Header("Practice Settings")]
-    public float waypointRadius = 2f;
+    public float waypointRadius = 4f;
     public float maxSwingAngle = 15f;
     public float maxTime = 120f;
     public float groundY = 0f; // the Y height of the ground plane
@@ -89,6 +89,7 @@ public class ZigzagPracticeManager : MonoBehaviour
         if (isFailed) return;
         isFailed = true;
         isActive = false;
+        Time.timeScale = 0f;
         Debug.Log($"Practice failed: {reason} | Final Score: {totalPoints}");
     }
 
@@ -96,6 +97,10 @@ public class ZigzagPracticeManager : MonoBehaviour
     {
         isActive = false;
         isCompleted = true;
+        Time.timeScale = 0f;
         Debug.Log($"Practice completed successfully in {timer:F1}s! Final Score: {totalPoints}");
     }
+    public bool IsCompleted => isCompleted;
+    public bool IsFailed => isFailed;
+    public bool IsActive => isActive;
 }
