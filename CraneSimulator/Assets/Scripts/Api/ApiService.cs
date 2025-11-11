@@ -102,48 +102,6 @@ public class ApiService : MonoBehaviour
 
     // ---------- Specific API wrappers (use the same DTO names you had) ----------
 
-    public async Task<ClassListResponse> GetMyClassesAsync(int userId)
-    {
-        string raw = await GetRawAsync(ApiConfig.MyClasses(userId));
-        if (string.IsNullOrEmpty(raw)) return null;
-        // original code wrapped array into { "items": [...] }
-        string wrapped = "{\"items\":" + raw + "}";
-        return JsonUtility.FromJson<ClassListResponse>(wrapped);
-    }
-
-    public async Task<TraineePracticeResponse> GetTraineePracticesAsync(int userId, int classId)
-    {
-        string raw = await GetRawAsync(ApiConfig.TraineePractices(userId, classId));
-        if (string.IsNullOrEmpty(raw)) return null;
-        string wrapped = "{\"items\":" + raw + "}";
-        return JsonUtility.FromJson<TraineePracticeResponse>(wrapped);
-    }
-
-    public async Task<PracticeAttemptResponse> CreatePracticeAttemptAsync(int sectionPracticeId, int userId)
-    {
-        string raw = await PostRawAsync(ApiConfig.CreatePracticeAttempt(sectionPracticeId, userId), null);
-        if (string.IsNullOrEmpty(raw)) return null;
-        return JsonUtility.FromJson<PracticeAttemptResponse>(raw);
-    }
-
-    public async Task<TraineePracticeStep[]> GetPracticeAttemptStepsAsync(int attemptId)
-    {
-        string raw = await GetRawAsync(ApiConfig.PracticeAttemptSteps(attemptId));
-        if (string.IsNullOrEmpty(raw)) return null;
-        // original code used JsonHelper.FromJson<TraineePracticeStep>(json) — we provide compatibility
-        return JsonHelper.FromJsonArray<TraineePracticeStep>(raw);
-    }
-
-    /// <summary>
-    /// Submits a step (the original route you used inside SelectionManager)
-    /// </summary>
-    public async Task<string> SubmitStepAsync(int attemptId, int userId, SubmitStepData dto)
-    {
-        // original used: https://.../attempt/{attemptId}/trainee/{userId}/submit
-        string url = ApiConfig.SubmitStep(attemptId, userId);
-        string raw = await PostRawAsync(url, dto);
-        return raw; // raw contains response JSON (caller can check message string)
-    }
 
     public async Task<string> CompleteAttemptAsync(int attemptId)
     {

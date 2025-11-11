@@ -15,8 +15,7 @@ public class SelectionManager : MonoBehaviour
     public TextMeshProUGUI descriptionText;
     public UnityEngine.UI.Image componentImage;
 
-    [Header("Settings Panel")]
-    public GameObject settingsPanel;
+    
 
     [Header("Cameras")]
     public Camera playerCamera;
@@ -50,7 +49,6 @@ public class SelectionManager : MonoBehaviour
         itemInfoCardUI.SetActive(false);
         itemInfoCardUI.transform.localScale = Vector3.zero;
 
-        settingsPanel?.SetActive(false);
         playerCamera.enabled = true;
         craneCamera?.SetActive(false);
     }
@@ -83,8 +81,7 @@ public class SelectionManager : MonoBehaviour
 
     private void HandleObjectSelection()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame)
-            ToggleSettingsPanel();
+        
         if (isControlMode && Keyboard.current.fKey.wasPressedThisFrame)
         {
             ExitControlMode();
@@ -139,23 +136,7 @@ public class SelectionManager : MonoBehaviour
         if (Keyboard.current.fKey.wasPressedThisFrame && interactable.controlScript != null)
             ToggleObjectControl(interactable);
     }
-
-    // =========================== //
-    // ==== Settings Toggle  ==== //
-    // =========================== //
-    private void ToggleSettingsPanel()
-    {
-        isSettingsOpen = !isSettingsOpen;
-        settingsPanel.SetActive(isSettingsOpen);
-        RegisterPanelState("settings", isSettingsOpen);
-
-        Time.timeScale = isSettingsOpen ? 0f : 1f;
-        Cursor.lockState = isSettingsOpen ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = isSettingsOpen;
-
-        player.SetActive(!isSettingsOpen);
-        interactionInfoUI.SetActive(!isSettingsOpen);
-    }
+    
 
     // =========================== //
     // ==== Control Handling  ==== //
@@ -213,6 +194,7 @@ public class SelectionManager : MonoBehaviour
 
         if (data != null)
         {
+
             idText.text = $"ID: {data.id}";
             nameText.text = $"Name: {data.name}";
             descriptionText.text = $"Description: {data.description}";
