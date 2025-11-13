@@ -8214,6 +8214,7 @@ MonoBehaviour:
   craneCamera: {fileID: 270204416}
   player: {fileID: 30692990}
   maxInspectDistance: 7
+  practiceTaskManager: {fileID: 0}
 --- !u!4 &512670341
 Transform:
   m_ObjectHideFlags: 0
@@ -11597,7 +11598,7 @@ GameObject:
   - component: {fileID: 799586613}
   - component: {fileID: 799586612}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Pause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11664,7 +11665,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &799586615
 RectTransform:
@@ -17400,7 +17401,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 43c02e199f4f9b943adb5c6cfe47e28e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -31531,6 +31532,8 @@ MonoBehaviour:
   optionsButton: {fileID: 1542174876}
   backFromOptionsButton: {fileID: 888816586}
   finishButton: {fileID: 1006060815}
+  practiceTaskManager: {fileID: 0}
+  zigzagPracticeManager: {fileID: 1044224755}
 --- !u!1 &2059148444
 GameObject:
   m_ObjectHideFlags: 0

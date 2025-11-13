@@ -25,6 +25,9 @@ public class SelectionManager : MonoBehaviour
     public GameObject player;
     public float maxInspectDistance = 3f;
 
+    [Header("Practice Manager")]
+    public PracticeTaskManager practiceTaskManager;
+
     private TextMeshProUGUI interactionText;
     private Coroutine currentAnimation;
 
@@ -189,7 +192,7 @@ public class SelectionManager : MonoBehaviour
         idText.text = "Loading...";
         nameText.text = descriptionText.text = "";
         componentImage.sprite = null;
-
+        practiceTaskManager.MarkTaskAsDone(item.ItemID);
         var data = await ApiService.Instance.GetComponentByIdAsync(item.GetItemID());
 
         if (data != null)

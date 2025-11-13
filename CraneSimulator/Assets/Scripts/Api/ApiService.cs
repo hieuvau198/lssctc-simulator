@@ -180,6 +180,31 @@ public class ApiService : MonoBehaviour
     { 
         public PracticeDto[] items; 
     }
+    //Finish Practice attempt
+    public async Task<string> CompletePracticeAttemptAsync(PracticeAttemptCompleteDto attempt)
+    {
+        try
+        {
+            var json = JsonUtility.ToJson(attempt);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var res = await httpClient.PostAsync(ApiConfig.PracticeAttemptComplete(), content);
+            var txt = await res.Content.ReadAsStringAsync();
+
+            if (!res.IsSuccessStatusCode)
+            {
+                Debug.LogError($"POST PracticeAttemptComplete failed: {res.StatusCode}\n{txt}");
+                return null;
+            }
+
+            return txt;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"POST PracticeAttemptComplete Exception: {ex.Message}");
+            return null;
+        }
+    }
+
 
     public async Task<ComponentDto> GetComponentByIdAsync(int id)
     {

@@ -57,6 +57,25 @@ public class PracticeDto
     public int activityId;
     public bool isCompleted;
 }
+[Serializable]
+public class PracticeAttemptTaskDto
+{
+    public int taskId;
+    public int score;
+    public bool isPass;
+}
+
+[Serializable]
+public class PracticeAttemptCompleteDto
+{
+    public int classId;
+    public int practiceId;
+    public int score;
+    public string description;
+    public bool isPass;
+    public List<PracticeAttemptTaskDto> practiceAttemptTasks;
+}
+
 // ---- Generic ApiResponse if you want to parse message field (optional) ----
 [Serializable]
 public class ApiResponse

@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -12,6 +14,10 @@ public class PauseMenu : MonoBehaviour
     public Button optionsButton;
     public Button backFromOptionsButton;
     public Button finishButton;
+
+    [Header("Practice Manager")]
+    public PracticeTaskManager practiceTaskManager; // Reference in scene with multiple tasks
+    public ZigzagPracticeManager zigzagPracticeManager; // Reference in zigzag practice scene
 
     private bool isPaused = false;
 
@@ -24,17 +30,12 @@ public class PauseMenu : MonoBehaviour
         optionsButton.onClick.AddListener(OpenOptions);
         backFromOptionsButton.onClick.AddListener(CloseOptions);
 
-        if (attemptId == 0)
+        
+        finishButton.onClick.AddListener(() =>
         {
-            finishButton.interactable = false;
-        }
-        else
-        {
-            finishButton.onClick.AddListener(() =>
-            {
-                _ = FinishPracticeAttempt(attemptId);
-            });
-        }
+            _ = FinishPracticeAttempt();
+        });
+        
 
         pauseMenuUI.SetActive(false);
         optionsMenuUI.SetActive(false);
@@ -86,20 +87,78 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
     }
 
-    private async Task FinishPracticeAttempt(int attemptId)
+    private async Task FinishPracticeAttempt()
     {
-        //var raw = await ApiService.Instance.CompleteAttemptAsync(attemptId);
-        //if (!string.IsNullOrEmpty(raw))
-        //{
-        //    Debug.Log("[DEBUG] Attempt completed: " + raw);
-        //    PlayerPrefs.DeleteKey("practiceAttemptId");
-        //    PlayerPrefs.Save();
-        //    Time.timeScale = 1f;
-        //    SceneManager.LoadScene("PracticeListScene");
-        //}
-        //else
-        //{
-        //    Debug.LogError("Failed to complete attempt.");
-        //}
+        int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
+        int practiceId = PlayerPrefs.GetInt("selectedPracticeId", 0);
+
+        if (classId == 0 || practiceId == 0)
+        {
+            Debug.LogError("ClassId or PracticeId not set, can't finish attempt.");
+            return;
+        }
+
+        List<PracticeAttemptTaskDto> practiceAttemptTasks = new List<PracticeAttemptTaskDto>();
+        int totalScore = 0;
+        bool isPassed = false;
+
+        if (practiceTaskManager != null)
+        {
+            // Build attempt from multiple tasks
+            foreach (var task in practiceTaskManager.tasks)
+            {
+                practiceAttemptTasks.Add(new PracticeAttemptTaskDto
+                {
+                    taskId = task.taskId,
+                    score = task.isCompleted ? 100 : 0,
+                    isPass = task.isCompleted
+                });
+            }
+            totalScore = practiceAttemptTasks.Sum(t => t.score) / practiceAttemptTasks.Count;
+            isPassed = practiceAttemptTasks.All(t => t.isPass);
+        }
+        else if (zigzagPracticeManager != null)
+        {
+            // Single task/zag practice - just summary pass and score
+            totalScore = zigzagPracticeManager.totalPoints;
+            isPassed = zigzagPracticeManager.IsCompleted && !zigzagPracticeManager.IsFailed;
+
+            practiceAttemptTasks.Add(new PracticeAttemptTaskDto
+            {
+                taskId = 1,   
+                score = totalScore,
+                isPass = isPassed
+            });
+        }
+        else
+        {
+            Debug.LogError("No practice manager assigned.");
+            return;
+        }
+
+        var attemptDto = new PracticeAttemptCompleteDto
+        {
+            classId = classId,
+            practiceId = practiceId,
+            score = totalScore,
+            description = isPassed ? "Practice completed successfully" : "Practice failed",
+            isPass = isPassed,
+            practiceAttemptTasks = practiceAttemptTasks
+        };
+
+        var response = await ApiService.Instance.CompletePracticeAttemptAsync(attemptDto);
+        if (!string.IsNullOrEmpty(response))
+        {
+            Debug.Log("[DEBUG] Attempt completed: " + response);
+            PlayerPrefs.Save();
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("PracticeListScene");
+        }
+        else
+        {
+            Debug.LogError("Failed to complete attempt.");
+        }
     }
+
+
 }
