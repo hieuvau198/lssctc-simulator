@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,11 @@ public class ApiService : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+    public void SetAuthorizationToken(string token)
+    {
+        httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
     }
 
     // helper to GET raw string
@@ -100,14 +106,79 @@ public class ApiService : MonoBehaviour
         }
     }
 
-    // ---------- Specific API wrappers (use the same DTO names you had) ----------
-
-
-    public async Task<string> CompleteAttemptAsync(int attemptId)
+    #region API
+    public async Task<LoginResponse> LoginAsync(string username, string password)
     {
-        string url = ApiConfig.CompleteAttempt(attemptId);
-        string raw = await PutRawAsync(url, null);
-        return raw;
+        string url = ApiConfig.Login();
+
+        var body = new LoginRequest
+        {
+            username = username,
+            password = password
+        };
+
+        try
+        {
+            var json = JsonUtility.ToJson(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync(url, content);
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Debug.LogError($"Login failed: {response.StatusCode}\n{responseText}");
+                return null;
+            }
+
+            // Parse JSON into LoginResponse
+            var result = JsonUtility.FromJson<LoginResponse>(responseText);
+
+            // Optional: store token for later requests
+            if (result != null && !string.IsNullOrEmpty(result.accessToken))
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.accessToken);
+
+                PlayerPrefs.SetString("AccessToken", result.accessToken);
+                PlayerPrefs.SetString("Username", result.userName);
+                PlayerPrefs.SetInt("ExpiresIn", result.expiresIn);
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Login exception: {ex.Message}");
+            return null;
+        }
+    }
+    //Classes for User
+    public async Task<List<ClassDto>> GetClassesForUserAsync(int userId)
+    {
+        string raw = await GetRawAsync(ApiConfig.ClassesForUser(userId));
+        if (string.IsNullOrEmpty(raw)) return null;
+
+        // Parse as List<ClassDto>
+        ClassDto[] classes = JsonUtility.FromJson<ClassDtoArrayWrapper>("{\"items\":" + raw + "}").items;
+        return new List<ClassDto>(classes);
+    }
+    [Serializable]
+    private class ClassDtoArrayWrapper
+    {
+        public ClassDto[] items;
+    }
+    //Practices for Class
+    public async Task<List<PracticeDto>> GetPracticesForClassAsync(int classId)
+    {
+        string raw = await GetRawAsync(ApiConfig.PracticesForClass(classId));
+        if (string.IsNullOrEmpty(raw)) return null;
+        PracticeDto[] practices = JsonUtility.FromJson<PracticeDtoArrayWrapper>("{\"items\":" + raw + "}").items;
+        return new List<PracticeDto>(practices);
+    }
+    [Serializable]
+    private class PracticeDtoArrayWrapper 
+    { 
+        public PracticeDto[] items; 
     }
 
     public async Task<ComponentDto> GetComponentByIdAsync(int id)
@@ -116,4 +187,6 @@ public class ApiService : MonoBehaviour
         if (string.IsNullOrEmpty(raw)) return null;
         return JsonUtility.FromJson<ComponentDto>(raw);
     }
+    #endregion
+
 }

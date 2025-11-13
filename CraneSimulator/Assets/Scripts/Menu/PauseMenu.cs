@@ -88,18 +88,18 @@ public class PauseMenu : MonoBehaviour
 
     private async Task FinishPracticeAttempt(int attemptId)
     {
-        var raw = await ApiService.Instance.CompleteAttemptAsync(attemptId);
-        if (!string.IsNullOrEmpty(raw))
-        {
-            Debug.Log("[DEBUG] Attempt completed: " + raw);
-            PlayerPrefs.DeleteKey("practiceAttemptId");
-            PlayerPrefs.Save();
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("PracticeListScene");
-        }
-        else
-        {
-            Debug.LogError("Failed to complete attempt.");
-        }
+        //var raw = await ApiService.Instance.CompleteAttemptAsync(attemptId);
+        //if (!string.IsNullOrEmpty(raw))
+        //{
+        //    Debug.Log("[DEBUG] Attempt completed: " + raw);
+        //    PlayerPrefs.DeleteKey("practiceAttemptId");
+        //    PlayerPrefs.Save();
+        //    Time.timeScale = 1f;
+        //    SceneManager.LoadScene("PracticeListScene");
+        //}
+        //else
+        //{
+        //    Debug.LogError("Failed to complete attempt.");
+        //}
     }
 }
