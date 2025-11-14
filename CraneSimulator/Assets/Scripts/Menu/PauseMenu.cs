@@ -125,7 +125,7 @@ public class PauseMenu : MonoBehaviour
 
             practiceAttemptTasks.Add(new PracticeAttemptTaskDto
             {
-                taskId = 1,   
+                taskId = 22,   
                 score = totalScore,
                 isPass = isPassed
             });

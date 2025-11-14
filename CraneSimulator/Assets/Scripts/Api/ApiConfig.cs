@@ -8,7 +8,7 @@ public static class ApiConfig
 
     // Endpoints (exact same routes you used)
     public static string Login() => $"{BaseMainUrl}Authens/login-username";
-    public static string ClassesForUser(int userId) => $"{BaseMainUrl}Classes/trainee/{userId}";
+    public static string ClassesForUser() => $"{BaseMainUrl}Classes/my-classes";
     public static string PracticesForClass(int classId) => $"{BaseMainUrl}Practices/trainee/class/{classId}";
     public static string PracticeAttemptComplete() => $"{BaseMainUrl}PracticeAttempts";
 

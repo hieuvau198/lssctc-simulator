@@ -84,7 +84,6 @@ public class CraneHook : MonoBehaviour
         if (cargoDetected)
         {
             Debug.DrawRay(hookAttachPoint.position, Vector3.down * attachDistance, Color.green);
-            Debug.Log($"[CraneHook] Cargo detected: {cargoHit.collider.name}");
 
             // Optional: Align the decay hook to cargo surface directly
             decayHookPoint.position = cargoHit.point + cargoHit.normal * 0.01f;

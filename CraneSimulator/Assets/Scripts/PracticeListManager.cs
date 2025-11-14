@@ -31,45 +31,44 @@ public class PracticeListManager : MonoBehaviour
     private List<PracticeItem> localPractices = new List<PracticeItem>()
     {
         new PracticeItem {
-            practiceId = 1,
-            practiceName = "Hook Operation",
-            practiceDescription = "Learn to attach and lift cargo correctly.",
-            estimatedDurationMinutes = 10,
-            difficultyLevel = "Beginner",
-            sceneName = "Practice1" 
-        },
-        new PracticeItem {
-            practiceId = 2,
-            practiceName = "Crane Movement",
-            practiceDescription = "Control the crane and move loads safely.",
-            estimatedDurationMinutes = 15,
-            difficultyLevel = "Intermediate",
-            sceneName = "Practice2"
-        },
-        
-        // new PracticeItem {
-        //     practiceId = 3,
-        //     practiceName = "Precision Challenge",
-        //     practiceDescription = "Place the load accurately into position.",
-        //     estimatedDurationMinutes = 20,
-        //     difficultyLevel = "Advanced",
-        //     sceneName = "PrecisionChallengeScene"
-        // }
+                practiceId = 8,
+                practiceName = "Component Inspection",
+                practiceDescription = "Trainee must walk around the crane and inspect all required components including hook block, boom, outriggers, column, and control panel.",
+                estimatedDurationMinutes = 10,
+                difficultyLevel = "Entry",
+                sceneName = "Practice1"
+            },
+
+            new PracticeItem {
+                practiceId = 9,
+                practiceName = "Zigzag Cargo Navigation",
+                practiceDescription = "Lift a cargo and move it through a zigzag path without hitting obstacles while keeping the cargo stable.",
+                estimatedDurationMinutes = 15,
+                difficultyLevel = "Intermediate",
+                sceneName = "Practice2"
+            },
+
+            new PracticeItem {
+                practiceId = 10,
+                practiceName = "Cargo Positioning Challenge",
+                practiceDescription = "Move the cargo and place it accurately inside the designated circle on the ground.",
+                estimatedDurationMinutes = 8,
+                difficultyLevel = "Entry",
+                sceneName = "Practice3"
+            }
     };
 
     private async void Start()
     {
-        //int userId = PlayerPrefs.GetInt("UserId", 0);
-        int userId = 8;
-        await PopulateClassDropdown(userId);
+        await PopulateClassDropdown();
         dropdown.onValueChanged.AddListener(OnClassSelected);
     }
-    private async Task PopulateClassDropdown(int userId)
+    private async Task PopulateClassDropdown()
     {
         dropdown.ClearOptions();
         errorText.color = Color.white;
         errorText.text = "Loading classes...";
-        classList = await ApiService.Instance.GetClassesForUserAsync(userId);
+        classList = await ApiService.Instance.GetClassesForUserAsync();
         List<string> options = new List<string>();
 
         options.Add("Select a class..."); // Null/default item
@@ -93,6 +92,10 @@ public class PracticeListManager : MonoBehaviour
         }
 
         var selectedClass = classList[index - 1];
+
+        PlayerPrefs.SetInt("SelectedClassId", selectedClass.id);
+        PlayerPrefs.Save();
+
         errorText.color = Color.white;
         errorText.text = $"Loading practices for: {selectedClass.name}";
 
@@ -146,10 +149,10 @@ public class PracticeListManager : MonoBehaviour
             startButton.onClick.AddListener(() =>
             {
                 PlayerPrefs.SetInt("selectedPracticeId", practice.practiceId);
-                PlayerPrefs.SetString("selectedPracticeName", practice.practiceName);
-                PlayerPrefs.SetString("selectedPracticeDescription", practice.practiceDescription);
-                PlayerPrefs.SetString("selectedPracticeDifficulty", practice.difficultyLevel);
-                PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
+                //PlayerPrefs.SetString("selectedPracticeName", practice.practiceName);
+                //PlayerPrefs.SetString("selectedPracticeDescription", practice.practiceDescription);
+                //PlayerPrefs.SetString("selectedPracticeDifficulty", practice.difficultyLevel);
+                //PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
                 PlayerPrefs.Save();
 
                 // Load each practice’s own scene

@@ -89,7 +89,6 @@ public class ZigzagPracticeManager : MonoBehaviour
         if (isFailed) return;
         isFailed = true;
         isActive = false;
-        Time.timeScale = 0f;
         Debug.Log($"Practice failed: {reason} | Final Score: {totalPoints}");
     }
 
@@ -97,7 +96,6 @@ public class ZigzagPracticeManager : MonoBehaviour
     {
         isActive = false;
         isCompleted = true;
-        Time.timeScale = 0f;
         Debug.Log($"Practice completed successfully in {timer:F1}s! Final Score: {totalPoints}");
     }
     public bool IsCompleted => isCompleted;

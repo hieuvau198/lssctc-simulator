@@ -153,9 +153,9 @@ public class ApiService : MonoBehaviour
         }
     }
     //Classes for User
-    public async Task<List<ClassDto>> GetClassesForUserAsync(int userId)
+    public async Task<List<ClassDto>> GetClassesForUserAsync()
     {
-        string raw = await GetRawAsync(ApiConfig.ClassesForUser(userId));
+        string raw = await GetRawAsync(ApiConfig.ClassesForUser());
         if (string.IsNullOrEmpty(raw)) return null;
 
         // Parse as List<ClassDto>

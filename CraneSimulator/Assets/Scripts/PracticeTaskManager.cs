@@ -52,11 +52,11 @@ public class PracticeTaskManager : MonoBehaviour
     {
         tasks = new List<PracticeTask>
         {
-            new PracticeTask { taskId = 1, componentId=16, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 2, componentId=14, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 3, componentId=18, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 4, componentId=15, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 5, componentId=17, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
+            new PracticeTask { taskId = 17, componentId=16, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
+            new PracticeTask { taskId = 18, componentId=14, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
+            new PracticeTask { taskId = 19, componentId=18, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
+            new PracticeTask { taskId = 20, componentId=15, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
+            new PracticeTask { taskId = 21, componentId=17, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
         };
     }
 
@@ -89,11 +89,5 @@ public class PracticeTaskManager : MonoBehaviour
             taskStatusLabels[task.taskId].text = "<color=green>Done</color>";
             Debug.Log($"Task '{task.taskName}' marked as done.");
         }
-    }
-
-    public bool IsTaskDone(int taskId)
-    {
-        var task = tasks.Find(t => t.taskId == taskId);
-        return task != null && task.isCompleted;
     }
 }

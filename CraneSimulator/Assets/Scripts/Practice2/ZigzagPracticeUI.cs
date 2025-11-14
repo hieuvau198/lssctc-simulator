@@ -25,8 +25,7 @@ public class ZigzagPracticeUI : MonoBehaviour
         objectivesText.text =
             "- Reach all waypoints in order.\n" +
             "- Avoid hitting poles (-5 pts each).\n" +
-            "- Keep cargo height above 1.72.\n" +
-            "- Complete within 120 seconds.";
+            "- Keep cargo height above the ground.";
     }
 
     void Update()
@@ -40,11 +39,11 @@ public class ZigzagPracticeUI : MonoBehaviour
         if (practiceManager != null)
         {
             if (practiceManager.IsCompleted)
-                statusText.text = "Status: Completed";
+                statusText.text = "Status: "+ "<color=#4CAF50>Completed</color>";
             else if (practiceManager.IsFailed)
-                statusText.text = "Status: Failed";
+                statusText.text = "Status: "+ "<color=#FF5252>Failed</color>";
             else
-                statusText.text = "Status: Ongoing";
+                statusText.text = "Status: "+ "<color=#FFEB3B>Ongoing</color>";
         }
     }
 }
