@@ -3,6 +3,7 @@ using UnityEngine;
 public class LoadCollisionDetector : MonoBehaviour
 {
     public ZigzagPracticeManager practiceManager;
+    public CargoPositioningManager cargoPositioningManager;
     public float minYPosition = 1.72f;
 
     private void Update()
@@ -17,11 +18,15 @@ public class LoadCollisionDetector : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (!practiceManager) return;
+        if (!practiceManager || !cargoPositioningManager) return;
 
-        if (collision.gameObject.CompareTag("Pole"))
+        if (practiceManager && collision.gameObject.CompareTag("Pole"))
         {
             practiceManager.DeductPoints(practiceManager.polePenalty);
+        }
+        if (cargoPositioningManager && collision.gameObject.CompareTag("Pole"))
+        {
+            cargoPositioningManager.DeductPoints(cargoPositioningManager.polePenalty);
         }
 
     }

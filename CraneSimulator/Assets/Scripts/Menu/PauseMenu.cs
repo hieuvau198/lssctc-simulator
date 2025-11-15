@@ -18,6 +18,7 @@ public class PauseMenu : MonoBehaviour
     [Header("Practice Manager")]
     public PracticeTaskManager practiceTaskManager; // Reference in scene with multiple tasks
     public ZigzagPracticeManager zigzagPracticeManager; // Reference in zigzag practice scene
+    public CargoPositioningManager cargoPositioningManager; // Reference in cargo positioning practice scene
 
     private bool isPaused = false;
 
@@ -126,6 +127,19 @@ public class PauseMenu : MonoBehaviour
             practiceAttemptTasks.Add(new PracticeAttemptTaskDto
             {
                 taskId = 22,   
+                score = totalScore,
+                isPass = isPassed
+            });
+        }
+        else if (cargoPositioningManager != null)
+        {
+            // Single task/zag practice - just summary pass and score
+            totalScore = cargoPositioningManager.totalPoints;
+            isPassed = cargoPositioningManager.IsCompleted && !cargoPositioningManager.IsFailed;
+
+            practiceAttemptTasks.Add(new PracticeAttemptTaskDto
+            {
+                taskId = 23,
                 score = totalScore,
                 isPass = isPassed
             });
