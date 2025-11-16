@@ -52,11 +52,11 @@ public class PracticeTaskManager : MonoBehaviour
     {
         tasks = new List<PracticeTask>
         {
-            new PracticeTask { taskId = 17, componentId=16, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 18, componentId=14, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 19, componentId=18, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 20, componentId=15, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 21, componentId=17, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
+            new PracticeTask { taskId = 17, componentId=3, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
+            new PracticeTask { taskId = 18, componentId=1, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
+            new PracticeTask { taskId = 19, componentId=5, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
+            new PracticeTask { taskId = 20, componentId=2, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
+            new PracticeTask { taskId = 21, componentId=4, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
         };
     }
 

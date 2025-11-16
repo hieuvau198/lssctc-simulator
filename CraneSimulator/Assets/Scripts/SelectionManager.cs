@@ -192,7 +192,10 @@ public class SelectionManager : MonoBehaviour
         idText.text = "Loading...";
         nameText.text = descriptionText.text = "";
         componentImage.sprite = null;
-        practiceTaskManager.MarkTaskAsDone(item.ItemID);
+        if(practiceTaskManager != null)
+        {
+            practiceTaskManager.MarkTaskAsDone(item.ItemID);
+        }
         var data = await ApiService.Instance.GetComponentByIdAsync(item.GetItemID());
 
         if (data != null)

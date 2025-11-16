@@ -18,7 +18,7 @@ public class LoadCollisionDetector : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (!practiceManager || !cargoPositioningManager) return;
+        if (!practiceManager && !cargoPositioningManager) return;
 
         if (practiceManager && collision.gameObject.CompareTag("Pole"))
         {
