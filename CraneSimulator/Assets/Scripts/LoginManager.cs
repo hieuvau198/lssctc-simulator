@@ -56,6 +56,7 @@ public class LoginManager : MonoBehaviour
             PlayerPrefs.SetString("Username", loginResult.userName);
             PlayerPrefs.Save();
             errorText.text = "";
+            this.enabled = false;
             SceneManager.LoadScene("PracticeListScene");
         }
         else
