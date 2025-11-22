@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 6
+  ItemCode: COMPONENT_06
   controlScript: {fileID: 6442065673136708517}
 --- !u!114 &6272192273285633106
 MonoBehaviour:
@@ -666,7 +666,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 10
+  ItemCode: COMPONENT_10
   controlScript: {fileID: 6451990768894733260}
 --- !u!114 &4482559675316553395
 MonoBehaviour:
@@ -773,7 +773,7 @@ GameObject:
   - component: {fileID: 4478932759990207270}
   - component: {fileID: 1749403999751617656}
   m_Layer: 0
-  m_Name: Cabin_Case
+  m_Name: Operator_Cabin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -860,7 +860,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 4
+  ItemCode: COMPONENT_04
   controlScript: {fileID: 0}
 --- !u!114 &4478932759990207270
 MonoBehaviour:
@@ -1091,7 +1091,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 5
+  ItemCode: COMPONENT_05
   controlScript: {fileID: 0}
 --- !u!114 &7542766031058368712
 MonoBehaviour:
@@ -1379,7 +1379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 1
+  ItemCode: COMPONENT_01
   controlScript: {fileID: 0}
 --- !u!114 &7674502785053152938
 MonoBehaviour:
@@ -2076,7 +2076,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 3
+  ItemCode: COMPONENT_03
   controlScript: {fileID: 0}
 --- !u!114 &6430136657566004961
 MonoBehaviour:
@@ -2667,7 +2667,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 8
+  ItemCode: COMPONENT_08
   controlScript: {fileID: 5147977523190872088}
 --- !u!114 &1042791620655817174
 MonoBehaviour:
@@ -3588,7 +3588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 7
+  ItemCode: COMPONENT_07
   controlScript: {fileID: 7340359512606173929}
 --- !u!114 &4608201475262365526
 MonoBehaviour:
@@ -4041,7 +4041,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 11
+  ItemCode: COMPONENT_11
   controlScript: {fileID: 7990290113953787706}
 --- !u!114 &4116818679294044039
 MonoBehaviour:
@@ -4293,7 +4293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 2
+  ItemCode: COMPONENT_02
   controlScript: {fileID: 0}
 --- !u!64 &2027943281866956552
 MeshCollider:
@@ -4586,7 +4586,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 9
+  ItemCode: COMPONENT_09
   controlScript: {fileID: 7327822848608069053}
 --- !u!114 &3162363413098540121
 MonoBehaviour:
@@ -4834,7 +4834,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dac3dd463bff1047b0a93fc234b6d32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 5
+  ItemCode: COMPONENT_05
   controlScript: {fileID: 0}
 --- !u!114 &9156607507563294187
 MonoBehaviour:

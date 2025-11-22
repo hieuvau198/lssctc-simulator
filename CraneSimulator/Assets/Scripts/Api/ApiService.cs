@@ -172,14 +172,16 @@ public class ApiService : MonoBehaviour
     {
         string raw = await GetRawAsync(ApiConfig.PracticesForClass(classId));
         if (string.IsNullOrEmpty(raw)) return null;
-        PracticeDto[] practices = JsonUtility.FromJson<PracticeDtoArrayWrapper>("{\"items\":" + raw + "}").items;
+        PracticeDtoArrayWrapper wrapper = JsonUtility.FromJson<PracticeDtoArrayWrapper>(raw);
+        PracticeDto[] practices = wrapper.data;
         return new List<PracticeDto>(practices);
     }
     [Serializable]
-    private class PracticeDtoArrayWrapper 
-    { 
-        public PracticeDto[] items; 
+    private class PracticeDtoArrayWrapper
+    {
+        public PracticeDto[] data;
     }
+
     //Finish Practice attempt
     public async Task<string> CompletePracticeAttemptAsync(PracticeAttemptCompleteDto attempt)
     {
@@ -206,9 +208,9 @@ public class ApiService : MonoBehaviour
     }
 
 
-    public async Task<ComponentDto> GetComponentByIdAsync(int id)
+    public async Task<ComponentDto> GetComponentByCodeAsync(string code)
     {
-        string raw = await GetRawAsync(ApiConfig.ComponentById(id));
+        string raw = await GetRawAsync(ApiConfig.ComponentByCode(code));
         if (string.IsNullOrEmpty(raw)) return null;
         return JsonUtility.FromJson<ComponentDto>(raw);
     }

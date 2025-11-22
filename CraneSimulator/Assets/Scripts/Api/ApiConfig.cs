@@ -10,7 +10,7 @@ public static class ApiConfig
     public static string Login() => $"{BaseMainUrl}Authens/login-username";
     public static string ClassesForUser() => $"{BaseMainUrl}Classes/my-classes";
     public static string PracticesForClass(int classId) => $"{BaseMainUrl}Practices/trainee/class/{classId}";
-    public static string PracticeAttemptComplete() => $"{BaseMainUrl}PracticeAttempts";
+    public static string PracticeAttemptComplete() => $"{BaseMainUrl}PracticeAttempts/by-code";
 
-    public static string ComponentById(int id) => $"{BaseMainUrl}SimulationComponents/{id}";
+    public static string ComponentByCode(string code) => $"{BaseMainUrl}SimulationComponents/by-code/{code}";
 }

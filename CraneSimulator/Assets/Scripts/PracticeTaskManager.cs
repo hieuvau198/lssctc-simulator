@@ -10,7 +10,7 @@ public class PracticeTaskManager : MonoBehaviour
     public GameObject taskItemPrefab; // prefab with TextMeshProUGUI fields
 
     public List<PracticeTask> tasks = new List<PracticeTask>();
-    private Dictionary<int, TextMeshProUGUI> taskStatusLabels = new Dictionary<int, TextMeshProUGUI>();
+    private Dictionary<string, TextMeshProUGUI> taskStatusLabels = new Dictionary<string, TextMeshProUGUI>();
 
     private SelectionManager selectionManager;
 
@@ -52,11 +52,11 @@ public class PracticeTaskManager : MonoBehaviour
     {
         tasks = new List<PracticeTask>
         {
-            new PracticeTask { taskId = 17, componentId=3, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 18, componentId=1, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 19, componentId=5, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 20, componentId=2, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 21, componentId=4, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_01", componentCode="COMPONENT_03", taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_02", componentCode="COMPONENT_01", taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_03", componentCode="COMPONENT_05", taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_04", componentCode="COMPONENT_02", taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_05", componentCode="COMPONENT_04", taskName = "Inspect Operator’s Cabin", taskDescription = "Press E on the Operator’s Cabin.", isCompleted = false },
         };
     }
 
@@ -76,17 +76,17 @@ public class PracticeTaskManager : MonoBehaviour
             texts[0].text = $"{task.taskName}\n<size=80%><color=#555555>{task.taskDescription}</color></size>";
             texts[1].text = task.isCompleted ? "<color=green>Done</color>" : "<color=red>Not Done</color>";
 
-            taskStatusLabels[task.taskId] = texts[1];
+            taskStatusLabels[task.taskCode] = texts[1];
         }
     }
 
-    public void MarkTaskAsDone(int componentId)
+    public void MarkTaskAsDone(string componentCode)
     {
-        var task = tasks.Find(t => t.componentId == componentId);
+        var task = tasks.Find(t => t.componentCode == componentCode);
         if (task != null && !task.isCompleted)
         {
             task.isCompleted = true;
-            taskStatusLabels[task.taskId].text = "<color=green>Done</color>";
+            taskStatusLabels[task.taskCode].text = "<color=green>Done</color>";
             Debug.Log($"Task '{task.taskName}' marked as done.");
         }
     }

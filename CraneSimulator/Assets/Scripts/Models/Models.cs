@@ -47,6 +47,7 @@ public class PracticeDto
 {
     public int id;
     public string practiceName;
+    public string practiceCode;
     public string practiceDescription;
     public int estimatedDurationMinutes;
     public string difficultyLevel;
@@ -60,7 +61,7 @@ public class PracticeDto
 [Serializable]
 public class PracticeAttemptTaskDto
 {
-    public int taskId;
+    public string taskCode;
     public int score;
     public bool isPass;
 }
@@ -69,7 +70,7 @@ public class PracticeAttemptTaskDto
 public class PracticeAttemptCompleteDto
 {
     public int classId;
-    public int practiceId;
+    public string practiceCode;
     public int score;
     public string description;
     public bool isPass;

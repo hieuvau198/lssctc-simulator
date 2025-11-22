@@ -194,9 +194,9 @@ public class SelectionManager : MonoBehaviour
         componentImage.sprite = null;
         if(practiceTaskManager != null)
         {
-            practiceTaskManager.MarkTaskAsDone(item.ItemID);
+            practiceTaskManager.MarkTaskAsDone(item.ItemCode);
         }
-        var data = await ApiService.Instance.GetComponentByIdAsync(item.GetItemID());
+        var data = await ApiService.Instance.GetComponentByCodeAsync(item.GetItemCode());
 
         if (data != null)
         {

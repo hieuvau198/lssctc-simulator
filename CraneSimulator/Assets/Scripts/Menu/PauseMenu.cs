@@ -91,11 +91,11 @@ public class PauseMenu : MonoBehaviour
     private async Task FinishPracticeAttempt()
     {
         int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
-        int practiceId = PlayerPrefs.GetInt("selectedPracticeId", 0);
+        string practiceCode = PlayerPrefs.GetString("selectedPracticeCode", "");
 
-        if (classId == 0 || practiceId == 0)
+        if (classId == 0 || string.IsNullOrEmpty(practiceCode))
         {
-            Debug.LogError("ClassId or PracticeId not set, can't finish attempt.");
+            Debug.LogError("ClassCode or PracticeCode not set, can't finish attempt.");
             return;
         }
 
@@ -110,7 +110,7 @@ public class PauseMenu : MonoBehaviour
             {
                 practiceAttemptTasks.Add(new PracticeAttemptTaskDto
                 {
-                    taskId = task.taskId,
+                    taskCode = task.taskCode,
                     score = task.isCompleted ? 100 : 0,
                     isPass = task.isCompleted
                 });
@@ -126,7 +126,7 @@ public class PauseMenu : MonoBehaviour
 
             practiceAttemptTasks.Add(new PracticeAttemptTaskDto
             {
-                taskId = 22,   
+                taskCode = "TASK_06",   
                 score = totalScore,
                 isPass = isPassed
             });
@@ -139,7 +139,7 @@ public class PauseMenu : MonoBehaviour
 
             practiceAttemptTasks.Add(new PracticeAttemptTaskDto
             {
-                taskId = 23,
+                taskCode = "TASK_07",
                 score = totalScore,
                 isPass = isPassed
             });
@@ -153,7 +153,7 @@ public class PauseMenu : MonoBehaviour
         var attemptDto = new PracticeAttemptCompleteDto
         {
             classId = classId,
-            practiceId = practiceId,
+            practiceCode = practiceCode,
             score = totalScore,
             description = isPassed ? "Practice completed successfully" : "Practice failed",
             isPass = isPassed,

@@ -19,7 +19,7 @@ public class PracticeListManager : MonoBehaviour
     [System.Serializable]
     public class PracticeItem
     {
-        public int practiceId;
+        public string practiceCode;
         public string practiceName;
         public string practiceDescription;
         public int estimatedDurationMinutes;
@@ -31,7 +31,7 @@ public class PracticeListManager : MonoBehaviour
     private List<PracticeItem> localPractices = new List<PracticeItem>()
     {
         new PracticeItem {
-                practiceId = 8,
+                practiceCode = "PRACTICE_08",
                 practiceName = "Component Inspection",
                 practiceDescription = "Trainee must walk around the crane and inspect all required components including hook block, boom, outriggers, column, and control panel.",
                 estimatedDurationMinutes = 10,
@@ -40,7 +40,7 @@ public class PracticeListManager : MonoBehaviour
             },
 
             new PracticeItem {
-                practiceId = 9,
+                practiceCode = "PRACTICE_09",
                 practiceName = "Zigzag Cargo Navigation",
                 practiceDescription = "Lift a cargo and move it through a zigzag path without hitting obstacles while keeping the cargo stable.",
                 estimatedDurationMinutes = 15,
@@ -49,7 +49,7 @@ public class PracticeListManager : MonoBehaviour
             },
 
             new PracticeItem {
-                practiceId = 10,
+                practiceCode = "PRACTICE_10",
                 practiceName = "Cargo Positioning Challenge",
                 practiceDescription = "Move the cargo and place it accurately inside the designated circle on the ground.",
                 estimatedDurationMinutes = 8,
@@ -111,7 +111,7 @@ public class PracticeListManager : MonoBehaviour
 
         // Filter local practices to those whose IDs match API response
         var filteredPractices = localPractices.FindAll(
-            p => apiPractices.Any(api => api.id == p.practiceId)
+            p => apiPractices.Any(api => api.practiceCode == p.practiceCode)
         );
 
         // Display
@@ -148,11 +148,7 @@ public class PracticeListManager : MonoBehaviour
 
             startButton.onClick.AddListener(() =>
             {
-                PlayerPrefs.SetInt("selectedPracticeId", practice.practiceId);
-                //PlayerPrefs.SetString("selectedPracticeName", practice.practiceName);
-                //PlayerPrefs.SetString("selectedPracticeDescription", practice.practiceDescription);
-                //PlayerPrefs.SetString("selectedPracticeDifficulty", practice.difficultyLevel);
-                //PlayerPrefs.SetInt("selectedPracticeDuration", practice.estimatedDurationMinutes);
+                PlayerPrefs.SetString("selectedPracticeCode", practice.practiceCode);
                 PlayerPrefs.Save();
 
                 // Load each practice’s own scene
