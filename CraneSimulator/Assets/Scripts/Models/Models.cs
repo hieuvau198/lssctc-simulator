@@ -77,6 +77,35 @@ public class PracticeAttemptCompleteDto
     public List<PracticeAttemptTaskDto> practiceAttemptTasks;
 }
 
+[System.Serializable]
+public class PracticeAttemptCompleteResponse
+{
+    public int id;
+    public int activityRecordId;
+    public int practiceId;
+    public string practiceCode;
+    public int score;
+    public string attemptDate;
+    public string attemptStatus;
+    public string description;
+    public bool isPass;
+    public bool isCurrent;
+    public List<PracticeAttemptTaskResponse> practiceAttemptTasks;
+}
+
+[System.Serializable]
+public class PracticeAttemptTaskResponse
+{
+    public int id;
+    public int practiceAttemptId;
+    public int taskId;
+    public string taskCode;
+    public int score;
+    public string description;
+    public bool isPass;
+}
+
+
 // ---- Generic ApiResponse if you want to parse message field (optional) ----
 [Serializable]
 public class ApiResponse

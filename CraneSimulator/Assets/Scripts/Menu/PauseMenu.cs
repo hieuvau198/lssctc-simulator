@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -14,6 +15,15 @@ public class PauseMenu : MonoBehaviour
     public Button optionsButton;
     public Button backFromOptionsButton;
     public Button finishButton;
+
+    [Header("Result UI")]
+    public GameObject resultPanel;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI statusText;
+    public Transform taskListParent;
+    public GameObject taskResultPrefab; 
+
+    public Button resultBackButton;
 
     [Header("Practice Manager")]
     public PracticeTaskManager practiceTaskManager; // Reference in scene with multiple tasks
@@ -40,6 +50,12 @@ public class PauseMenu : MonoBehaviour
 
         pauseMenuUI.SetActive(false);
         optionsMenuUI.SetActive(false);
+        resultPanel.SetActive(false);
+        resultBackButton.onClick.AddListener(() =>
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("PracticeListScene");
+        });
     }
 
     private void Update()
@@ -165,14 +181,48 @@ public class PauseMenu : MonoBehaviour
         {
             Debug.Log("[DEBUG] Attempt completed: " + response);
             PlayerPrefs.Save();
-            Time.timeScale = 1f;
-            SceneManager.LoadScene("PracticeListScene");
+
+            // Parse response JSON
+            var result = JsonUtility.FromJson<PracticeAttemptCompleteResponse>(response);
+
+            ShowResult(result);
         }
+
         else
         {
             Debug.LogError("Failed to complete attempt.");
         }
     }
 
+    private void ShowResult(PracticeAttemptCompleteResponse result)
+    {
+        // Freeze game
+        Time.timeScale = 0f;
+
+        pauseMenuUI.SetActive(false);
+        optionsMenuUI.SetActive(false);
+        resultPanel.SetActive(true);
+
+        scoreText.text = "Score: " + result.score;
+        statusText.text = result.isPass ? "Result: <color=green>Pass</color>" : "Result: <color=red>Fail</color>";
+
+        // Clear old items
+        foreach (Transform child in taskListParent)
+            Destroy(child.gameObject);
+
+        // Create task result items
+        foreach (var task in result.practiceAttemptTasks)
+        {
+            GameObject item = Instantiate(taskResultPrefab, taskListParent);
+
+            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.taskCode;
+            item.transform.Find("TaskScore").GetComponent<TextMeshProUGUI>().text = "Score: " + task.score;
+            item.transform.Find("TaskStatus").GetComponent<TextMeshProUGUI>().text =
+                task.isPass ? "Pass" : "Fail";
+        }
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
 
 }
