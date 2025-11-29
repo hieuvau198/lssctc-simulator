@@ -17,8 +17,9 @@ public class CraneHook : MonoBehaviour
 
     [Header("Decay Point Hook")]
     public Transform decayHookPoint;
-    public Transform decayHookOn;
-
+    //public Transform decayHookOn;
+    [Header("UI Text")]
+    public TMPro.TextMeshProUGUI attachHintText;
     private GameObject connectedCargo;
     private LineRenderer cargoRopes;
     private bool isConnected = false;
@@ -32,13 +33,9 @@ public class CraneHook : MonoBehaviour
         // Optional setup (sizes can be adjusted to your model)
         if (decayHookPoint)
             decayHookPoint.localScale = new Vector3(5.6f, 5.6f, 5.6f);
+        if (attachHintText)
+            attachHintText.gameObject.SetActive(false);
 
-        if (decayHookOn)
-        {
-            decayHookOn.localScale = new Vector3(2.8f, 2.8f, 2.8f);
-            decayHookOn.localPosition = new Vector3(0, -0.98f, -1.31f);
-            decayHookOn.gameObject.SetActive(false);
-        }
     }
 
     void Update()
@@ -58,6 +55,13 @@ public class CraneHook : MonoBehaviour
     }
     private void UpdateDecayPointRay()
     {
+        if (isConnected)
+        {
+            // Ensure hint and decay point stay OFF when connected
+            if (attachHintText) attachHintText.gameObject.SetActive(false);
+            if (decayHookPoint) decayHookPoint.gameObject.SetActive(false);
+            return;
+        }
         if (!decayHookPoint || !hookAttachPoint) return;
 
         Ray ray = new Ray(hookAttachPoint.position, Vector3.down);
@@ -90,21 +94,16 @@ public class CraneHook : MonoBehaviour
             decayHookPoint.rotation = Quaternion.LookRotation(-cargoHit.normal);
 
             // Show decayHookOn
-            if (decayHookOn)
+            if (attachHintText)
             {
-                if (!decayHookOn.gameObject.activeSelf)
-                    decayHookOn.gameObject.SetActive(true);
-
-                // Keep decayHookOn always upright
-                decayHookOn.position = decayHookPoint.position;
-                decayHookOn.rotation = Quaternion.identity; // upright
+                attachHintText.gameObject.SetActive(true);
+                attachHintText.text = "Press B to Hook";
             }
         }
         else
         {
-            // Hide decayHookOn if no cargo nearby
-            if (decayHookOn && decayHookOn.gameObject.activeSelf)
-                decayHookOn.gameObject.SetActive(false);
+            if (attachHintText && !isConnected)
+                attachHintText.gameObject.SetActive(false);
         }
     }
 
@@ -115,7 +114,6 @@ public class CraneHook : MonoBehaviour
         Ray ray = new Ray(hookAttachPoint.position, Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, attachDistance, cargoLayer))
         {
-
 
             CargoCrane_L cargoScript = hit.collider.GetComponentInParent<CargoCrane_L>();
             if (cargoScript != null)
@@ -187,6 +185,8 @@ public class CraneHook : MonoBehaviour
         cargoRopes.positionCount = 8;
         cargoRopes.numCapVertices = 4;
 
+        if (attachHintText) attachHintText.gameObject.SetActive(false);
+        if (decayHookPoint) decayHookPoint.gameObject.SetActive(false);
         isConnected = true;
     }
 
@@ -200,6 +200,9 @@ public class CraneHook : MonoBehaviour
         connectedCargo = null;
         cargoJoint = null;
         isConnected = false;
+
+        if (attachHintText)
+            attachHintText.gameObject.SetActive(false);
     }
 
     private void UpdateCargoRopes()
