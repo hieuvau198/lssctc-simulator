@@ -2869,8 +2869,8 @@ MonoBehaviour:
   mainRope: {fileID: 8841099481569541252}
   mainRopeStart: {fileID: 9201814733326109009}
   mainRopeEnd: {fileID: 3655124864679357387}
-  extendKey: 280
-  retractKey: 281
+  extendKey: 273
+  retractKey: 274
   extendSpeed: 4
 --- !u!1 &4022926835405378361
 GameObject:

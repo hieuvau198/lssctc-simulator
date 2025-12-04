@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using System.Collections;
@@ -39,13 +39,13 @@ public class LoginManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            errorText.text = "Please enter username and password.";
+            errorText.text = "Vui lòng nhập tên đăng nhập và mật khẩu.";
             return;
         }
 
         // Show loading message (optional)
         errorText.color = Color.white;
-        errorText.text = "Logging in...";
+        errorText.text = "Đang đăng nhập...";
 
         var loginResult = await ApiService.Instance.LoginAsync(username, password);
 
@@ -62,7 +62,7 @@ public class LoginManager : MonoBehaviour
         else
         {
             errorText.color = Color.red;
-            errorText.text = "Login failed. Check your username or password.";
+            errorText.text = "Đăng nhập thất bại. Vui lòng kiểm tra tên đăng nhập hoặc mật khẩu.";
         }
     }
     public void OnExitButtonClicked()
