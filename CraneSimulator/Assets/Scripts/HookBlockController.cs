@@ -107,4 +107,10 @@ public class HookBlockController : MonoBehaviour
         ropeRenderer.SetPosition(0, ropeStartPoint.position);
         ropeRenderer.SetPosition(1, ropeEndPoint.position);
     }
+
+    public bool IsRopeMoving()
+    {
+        return Input.GetKey(dropKey) || Input.GetKey(retractKey);
+    }
+
 }

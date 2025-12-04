@@ -68,4 +68,9 @@ public class BoomController : MonoBehaviour
             _piston_B.LookAt(_piston_A.position, _piston_B.up);
         }
     }
+
+    public bool IsBoomMoving()
+    {
+        return Input.GetKey(upBoom) || Input.GetKey(downBoom);
+    }
 }

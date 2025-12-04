@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class CraneHook : MonoBehaviour
 {
+    [Header("Reference")]
+    public HookBlockController hookBlockController;
+    public BoomController boomController;
     [Header("Hook & Rope Settings")]
     public Transform hookAttachPoint;         // Bottom of hook block
     public Material ropeMaterial;             // Line material for 4 cargo ropes
@@ -20,6 +23,9 @@ public class CraneHook : MonoBehaviour
     //public Transform decayHookOn;
     [Header("UI Text")]
     public TMPro.TextMeshProUGUI attachHintText;
+
+
+
     private GameObject connectedCargo;
     private LineRenderer cargoRopes;
     private bool isConnected = false;
@@ -50,6 +56,7 @@ public class CraneHook : MonoBehaviour
 
         if (isConnected && connectedCargo != null)
         {
+            StabilizeCargoDuringLift();
             UpdateCargoRopes();
         }
     }
@@ -219,6 +226,29 @@ public class CraneHook : MonoBehaviour
         ropePoints[6] = hookPos; ropePoints[7] = cargoPoints[3].position;
 
         cargoRopes.SetPositions(ropePoints);
+    }
+    private void StabilizeCargoDuringLift()
+    {
+        if (cargoJoint == null) return;
+
+        bool moving = (hookBlockController != null && hookBlockController.IsRopeMoving()) || (boomController !=null && boomController.IsBoomMoving());
+
+        SoftJointLimitSpring limitSpring = cargoJoint.linearLimitSpring;
+
+        if (moving)
+        {
+            // MAKE ROPE LENGTH STIFF BUT CONSTANT
+            limitSpring.spring = 20000f;
+            limitSpring.damper = 2000f;
+        }
+        else
+        {
+            // restore normal rope flexibility
+            limitSpring.spring = 0f;
+            limitSpring.damper = 0f;
+        }
+
+        cargoJoint.linearLimitSpring = limitSpring;
     }
 
     private void OnDrawGizmosSelected()

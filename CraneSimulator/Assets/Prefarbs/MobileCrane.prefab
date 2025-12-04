@@ -2518,6 +2518,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b4ae87f031f734490af21d75baad99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hookBlockController: {fileID: 7340359512606173929}
+  boomController: {fileID: 6442065673136708517}
   hookAttachPoint: {fileID: 6864213389445352333}
   ropeMaterial: {fileID: 2100000, guid: f9f512848e9fa72458c89d5919b58b1a, type: 2}
   ropeWidth: 0.04
