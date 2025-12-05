@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2152042333019938257}
   - component: {fileID: 6442065673136708517}
   m_Layer: 0
-  m_Name: Boom_Topping_Control_Lever
+  m_Name: "C\u1EA7n n\xE2ng h\u1EA1 m\xF3c c\u1EA9u"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -579,7 +579,7 @@ GameObject:
   - component: {fileID: 8570393577313678650}
   - component: {fileID: 6451990768894733260}
   m_Layer: 0
-  m_Name: Outrigger_Control_Lever_Street_Side
+  m_Name: "C\u1EA7n \u0111i\u1EC1u khi\u1EC3n ch\xE2n tr\u1EE5 (tr\xE1i)"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -773,7 +773,7 @@ GameObject:
   - component: {fileID: 4478932759990207270}
   - component: {fileID: 1749403999751617656}
   m_Layer: 0
-  m_Name: Operator_Cabin
+  m_Name: "B\u1ED9 \u0111i\u1EC1u khi\u1EC3n"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1003,7 +1003,7 @@ GameObject:
   - component: {fileID: 7542766031058368712}
   - component: {fileID: 5252618108658250929}
   m_Layer: 0
-  m_Name: Right_Outtrigger
+  m_Name: "Ch\xE2n tr\u1EE5 ph\u1EA3i"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1287,7 +1287,7 @@ GameObject:
   - component: {fileID: 7674502785053152938}
   - component: {fileID: 8308553327246927476}
   m_Layer: 0
-  m_Name: Boom_1
+  m_Name: "C\u1EA7n"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2123,7 +2123,7 @@ GameObject:
   - component: {fileID: 6090106516999006792}
   - component: {fileID: 4852100602293079127}
   m_Layer: 0
-  m_Name: Hook_Block
+  m_Name: "M\xF3c c\u1EA9u"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2719,7 +2719,7 @@ GameObject:
   - component: {fileID: 5292865234631933593}
   - component: {fileID: 5147977523190872088}
   m_Layer: 0
-  m_Name: Boom_Telescoping_Control_Lever
+  m_Name: "C\u1EA7n \u0111i\u1EC1u khi\u1EC3n thu ng\u1EAFn"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3640,7 +3640,7 @@ GameObject:
   - component: {fileID: 3568643364431605994}
   - component: {fileID: 7340359512606173929}
   m_Layer: 0
-  m_Name: Winch_Control_Lever
+  m_Name: "C\u1EA7n \u0111i\u1EC1u khi\u1EC3n chi\u1EC1u cao"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4093,7 +4093,7 @@ GameObject:
   - component: {fileID: 5492205128611453520}
   - component: {fileID: 7990290113953787706}
   m_Layer: 0
-  m_Name: Outrigger_Control_Lever_Curb_Side
+  m_Name: "C\u1EA7n \u0111i\u1EC1u khi\u1EC3n ch\xE2n tr\u1EE5 (ph\u1EA3i)"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4344,7 +4344,7 @@ GameObject:
   - component: {fileID: 2027943281866956552}
   - component: {fileID: 7179543195741684635}
   m_Layer: 0
-  m_Name: Columm
+  m_Name: "C\u1ED9t c\u1EA7n c\u1EA9u"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4638,7 +4638,7 @@ GameObject:
   - component: {fileID: 2243643387073158145}
   - component: {fileID: 7327822848608069053}
   m_Layer: 0
-  m_Name: Swing_Control_Lever
+  m_Name: "C\u1EA7n \u0111i\u1EC1u khi\u1EC3n quay"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4987,7 +4987,7 @@ GameObject:
   - component: {fileID: 9156607507563294187}
   - component: {fileID: 8733066980403123853}
   m_Layer: 0
-  m_Name: Left_Outtrigger
+  m_Name: "Ch\xE2n tr\u1EE5 tr\xE1i"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
