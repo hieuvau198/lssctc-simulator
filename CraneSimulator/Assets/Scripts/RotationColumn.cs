@@ -4,8 +4,8 @@ public class RotationColumn : MonoBehaviour
 {
     [Header("Rotation Column Crane")]
     public Transform columnCrane;
-    public KeyCode leftRotationColumn;
-    public KeyCode rightRotationColumn;
+    public KeyCode leftRotationColumn = KeyCode.LeftArrow;
+    public KeyCode rightRotationColumn = KeyCode.RightArrow;
     public float speedColumn = 0f;
     public float smoothRotationColumn = 1.2f;
 

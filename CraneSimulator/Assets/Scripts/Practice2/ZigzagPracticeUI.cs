@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class ZigzagPracticeUI : MonoBehaviour
@@ -17,15 +17,15 @@ public class ZigzagPracticeUI : MonoBehaviour
 
     void Start()
     {
-        if (panel != null)
-            panel.SetActive(false);
+        titleText.text = "Thực Hành Vận Chuyển Hàng Zigzag";
+        descriptionText.text =
+            "Di chuyển hàng cẩn thận qua từng điểm đánh dấu theo mô hình zigzag, "
+            + "không để chạm đất hoặc va vào chướng ngại vật.";
 
-        titleText.text = "Zigzag Cargo Practice";
-        descriptionText.text = "Carefully move the cargo through each waypoint in a zigzag pattern without touching the ground or hitting obstacles.";
         objectivesText.text =
-            "- Reach all waypoints in order.\n" +
-            "- Avoid hitting poles (-5 pts each).\n" +
-            "- Keep cargo height above the ground.";
+            "- Đi qua tất cả các điểm theo đúng thứ tự.\n" +
+            "- Tránh va vào cột (-5 điểm mỗi lần).\n" +
+            "- Giữ hàng cách mặt đất (không để chạm xuống).";
     }
 
     void Update()
@@ -39,11 +39,11 @@ public class ZigzagPracticeUI : MonoBehaviour
         if (practiceManager != null)
         {
             if (practiceManager.IsCompleted)
-                statusText.text = "Status: "+ "<color=#4CAF50>Completed</color>";
+                statusText.text = "Trạng thái: " + "<color=#4CAF50>Hoàn thành</color>";
             else if (practiceManager.IsFailed)
-                statusText.text = "Status: "+ "<color=#FF5252>Failed</color>";
+                statusText.text = "Trạng thái: " + "<color=#FF5252>Thất bại</color>";
             else
-                statusText.text = "Status: "+ "<color=#FFEB3B>Ongoing</color>";
+                statusText.text = "Trạng thái: " + "<color=#FFEB3B>Đang thực hiện</color>";
         }
     }
 }

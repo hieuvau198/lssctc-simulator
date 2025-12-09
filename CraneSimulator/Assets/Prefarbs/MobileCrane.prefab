@@ -725,8 +725,8 @@ MonoBehaviour:
   moveSpeed: 1
   armExtendDistance: 2
   legExtendDistance: 1
-  extendKey: 122
-  retractKey: 120
+  extendKey: 273
+  retractKey: 274
 --- !u!1 &1927310621575877939
 GameObject:
   m_ObjectHideFlags: 0
@@ -3788,8 +3788,8 @@ MonoBehaviour:
   minLength: 0.2
   maxLength: 2
   ropeSpeed: 0.25
-  dropKey: 110
-  retractKey: 109
+  dropKey: 274
+  retractKey: 273
   jointSpring: 50
   jointDamper: 5
 --- !u!1 &5749705219088115397
@@ -4239,8 +4239,8 @@ MonoBehaviour:
   moveSpeed: 1
   armExtendDistance: 2
   legExtendDistance: 1
-  extendKey: 99
-  retractKey: 118
+  extendKey: 273
+  retractKey: 274
 --- !u!1 &7164149636068001123
 GameObject:
   m_ObjectHideFlags: 0

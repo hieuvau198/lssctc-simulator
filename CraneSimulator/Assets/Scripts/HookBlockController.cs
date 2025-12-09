@@ -14,8 +14,8 @@ public class HookBlockController : MonoBehaviour
     public float ropeSpeed = 0.25f;
 
     [Header("Key Controls")]
-    public KeyCode dropKey = KeyCode.N;       // Extend rope (drop)
-    public KeyCode retractKey = KeyCode.M;    // Retract rope (pull up)
+    public KeyCode dropKey = KeyCode.DownArrow;       // Extend rope (drop)
+    public KeyCode retractKey = KeyCode.UpArrow;    // Retract rope (pull up)
 
     [Header("Joint Settings")]
     public float jointSpring = 50f;           // Rope stiffness

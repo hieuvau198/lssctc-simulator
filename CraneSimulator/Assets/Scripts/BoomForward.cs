@@ -22,8 +22,8 @@ public class BoomForward : MonoBehaviour
     public Transform mainRopeEnd;
 
     [Header("Settings")]
-    public KeyCode extendKey = KeyCode.Plus;   
-    public KeyCode retractKey = KeyCode.Minus;   
+    public KeyCode extendKey = KeyCode.UpArrow;   
+    public KeyCode retractKey = KeyCode.DownArrow;   
     public float extendSpeed = 2f;
     private bool boomFor_Bool = true;
 

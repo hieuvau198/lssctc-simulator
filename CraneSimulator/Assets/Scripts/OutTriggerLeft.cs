@@ -12,8 +12,8 @@ public class OutTriggerLeft : MonoBehaviour
     public float legExtendDistance = 1f; // moves along -Z
 
     [Header("Key Controls")]
-    public KeyCode extendKey = KeyCode.Z;
-    public KeyCode retractKey = KeyCode.X;
+    public KeyCode extendKey = KeyCode.UpArrow;
+    public KeyCode retractKey = KeyCode.DownArrow;
 
     private Vector3 armStartPos;
     private Vector3 legStartPos;
