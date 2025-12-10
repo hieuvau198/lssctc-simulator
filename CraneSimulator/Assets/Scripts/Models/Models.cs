@@ -58,6 +58,46 @@ public class PracticeDto
     public int activityId;
     public bool isCompleted;
 }
+[System.Serializable]
+public class SePracticeListDto 
+{
+    public int finalExamPartialId; 
+    public string finalExamPartialStatus;
+    public string startTime; 
+    public string endTime;
+    public int id;
+    public string practiceName;
+    public string practiceCode;
+    public string practiceDescription;
+    public int estimatedDurationMinutes;
+    public string difficultyLevel;
+    public int maxAttempts;
+    public string createdDate;
+    public bool isActive;  
+    public bool isCompleted;
+}
+[System.Serializable]
+public class ValidateExamCodeDto
+{
+    public string examCode;
+}
+[System.Serializable]
+public class SubmitSeFinalDto
+{
+    public decimal marks;
+    public bool isPass;
+    public string description;
+}
+[System.Serializable]
+public class FinalExamPartialDtoResponse
+{
+    public int id;
+    public string type;
+    public decimal marks;
+    public string status;
+    public string practiceName;
+    public string startTime;
+}
 [Serializable]
 public class PracticeAttemptTaskDto
 {
@@ -109,6 +149,11 @@ public class PracticeAttemptTaskResponse
 // ---- Generic ApiResponse if you want to parse message field (optional) ----
 [Serializable]
 public class ApiResponse
+{
+    public string message;
+}
+[Serializable]
+public class ErrorMessageDto
 {
     public string message;
 }

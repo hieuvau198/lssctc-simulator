@@ -13,4 +13,10 @@ public static class ApiConfig
     public static string PracticeAttemptComplete() => $"{BaseMainUrl}PracticeAttempts/by-code";
 
     public static string ComponentByCode(string code) => $"{BaseMainUrl}SimulationComponents/by-code/{code}";
+    // 1. GET final exam SE practice by classId
+    public static string FinalExamSePractices(int classId) => $"{BaseMainUrl}FinalExams/class/{classId}/my-se-practices";
+    // 2. POST check the available Exam code
+    public static string FinalExamSeValidateCode(int partialId) => $"{BaseMainUrl}FinalExams/partial/{partialId}/validate-se-code";
+    // 3. POST submit the final exam SE
+    public static string FinalExamSeSubmit(int partialId) => $"{BaseMainUrl}FinalExams/submit/se-final/{partialId}";
 }

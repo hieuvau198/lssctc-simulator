@@ -214,6 +214,80 @@ public class ApiService : MonoBehaviour
         if (string.IsNullOrEmpty(raw)) return null;
         return JsonUtility.FromJson<ComponentDto>(raw);
     }
+    [Serializable]
+    private class SePracticeListArrayWrapper
+    {
+        public SePracticeListDto[] items;
+    }
+    public async Task<List<SePracticeListDto>> GetFinalExamSePracticesAsync(int classId)
+    {
+        string url = ApiConfig.FinalExamSePractices(classId);
+        string raw = await GetRawAsync(url);
+
+        if (string.IsNullOrEmpty(raw) || raw == "[]") return new List<SePracticeListDto>();
+
+        
+
+        try
+        {
+            
+            var wrappedJson = "{\"items\":" + raw + "}";
+            SePracticeListDto[] practices = JsonUtility.FromJson<SePracticeListArrayWrapper>(wrappedJson).items;
+            return new List<SePracticeListDto>(practices);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse SE Practice List from API: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+
+    // 2. POST check the available Exam code when start the practice in the simulation
+    public async Task<object> ValidateFinalExamSeCodeAsync(int partialId, string examCode)
+    {
+        string url = ApiConfig.FinalExamSeValidateCode(partialId);
+        var body = new ValidateExamCodeDto { examCode = examCode };
+
+        string raw = await PostRawAsync(url, body);
+
+        if (string.IsNullOrEmpty(raw)) return null;
+        if (raw.Contains("\"message\""))
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                return err;
+            }
+            catch
+            {
+                return new ErrorMessageDto { message = "Unknown error" };
+            }
+        }
+        try
+        {
+            return JsonUtility.FromJson<FinalExamPartialDtoResponse>(raw);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse Validate SE Code response: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+
+    // 3. POST submit the final exam SE
+    public async Task<string> SubmitFinalExamSeAsync(int partialId, SubmitSeFinalDto submission)
+    {
+        string url = ApiConfig.FinalExamSeSubmit(partialId);
+
+        
+        string raw = await PostRawAsync(url, submission);
+
+        
+        if (string.IsNullOrEmpty(raw)) return null;
+
+        
+        return raw;
+    }
     #endregion
 
 }
