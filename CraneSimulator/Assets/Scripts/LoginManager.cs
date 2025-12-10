@@ -22,13 +22,51 @@ public class LoginManager : MonoBehaviour
     public Button finalExamButton;
 
     private bool popupActive = false;
+    
+    void Awake()
+    {
+        var managers = FindObjectsOfType<LoginManager>();
+        if (managers.Length > 1)
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
     void Start()
     {
-        modeSelectPopup.SetActive(false);
-        popupBlocker.SetActive(false);
+        popupActive = false;
 
-        trainingButton.onClick.AddListener(OnTrainingModeSelected);
-        finalExamButton.onClick.AddListener(OnFinalExamModeSelected);
+        Assign();
+
+        if (popupBlocker != null)
+            popupBlocker.SetActive(false);
+
+        if (modeSelectPopup != null)
+            modeSelectPopup.SetActive(false);
+
+        if (trainingButton != null)
+        {
+            trainingButton.onClick.RemoveAllListeners(); 
+            trainingButton.onClick.AddListener(OnTrainingModeSelected);
+        }
+
+        if (finalExamButton != null)
+        {
+            finalExamButton.onClick.RemoveAllListeners();
+            finalExamButton.onClick.AddListener(OnFinalExamModeSelected);
+        }
+
+        if (loginButton != null)
+        {
+            loginButton.onClick.RemoveAllListeners();
+            loginButton.onClick.AddListener(OnLoginButtonClicked);
+        }
+
+        if (exitButton != null)
+        {
+            exitButton.onClick.RemoveAllListeners();
+            exitButton.onClick.AddListener(OnExitButtonClicked);
+        }
     }
     void Update()
     {
@@ -79,7 +117,6 @@ public class LoginManager : MonoBehaviour
             PlayerPrefs.SetString("Username", loginResult.userName);
             PlayerPrefs.Save();
             errorText.text = "";
-            this.enabled = false;
             popupActive = true;               
             popupBlocker.SetActive(true);
             modeSelectPopup.SetActive(true);
@@ -94,6 +131,8 @@ public class LoginManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("IsFinalExam", 0);
         PlayerPrefs.Save();
+        popupActive = false;
+        popupBlocker.SetActive(false);
         SceneManager.LoadScene("PracticeListScene");
     }
 
@@ -101,6 +140,8 @@ public class LoginManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("IsFinalExam", 1);
         PlayerPrefs.Save();
+        popupActive = false;
+        popupBlocker.SetActive(false);
         SceneManager.LoadScene("PracticeListScene");
     }
     public void OnExitButtonClicked()
@@ -115,6 +156,18 @@ public class LoginManager : MonoBehaviour
             Application.Quit();
         #endif
     }
+    public void Assign()
+    {
+        usernameInput = GameObject.Find("Canvas/Login/username")?.GetComponent<TMP_InputField>();
+        passwordInput  = GameObject.Find("Canvas/Login/password")?.GetComponent<TMP_InputField>();
+        errorText = GameObject.Find("Canvas/Login/Error")?.GetComponent<TextMeshProUGUI>();
+        loginButton = GameObject.Find("Canvas/Login/Button/BtnLogin")?.GetComponent<Button>();
+        exitButton = GameObject.Find("Canvas/Login/Button/BtnExit")?.GetComponent<Button>();
+        modeSelectPopup = GameObject.Find("Canvas/ModeSelectPopup")?.gameObject;
+        popupBlocker = GameObject.Find("Canvas/PopupBlocker")?.gameObject;
+        trainingButton = GameObject.Find("Canvas/ModeSelectPopup/Button/Button_ModeTraining")?.GetComponent<Button>();
+        finalExamButton = GameObject.Find("Canvas/ModeSelectPopup/Button/Button_ModeExam")?.GetComponent<Button>();
+}
 
 }
 

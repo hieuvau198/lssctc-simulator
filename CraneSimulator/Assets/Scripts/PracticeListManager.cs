@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class PracticeListManager : MonoBehaviour
 {
@@ -108,7 +109,7 @@ public class PracticeListManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
         ApiService.Instance.SetAuthorizationToken(null);
-        UnityEngine.SceneManagement.SceneManager.LoadScene("Login");
+        SceneManager.LoadScene("Login");
     }
     private async void OnClassSelected(int index)
     {
@@ -238,7 +239,7 @@ public class PracticeListManager : MonoBehaviour
                 else
                     LoadPracticeScene();
                 // Load each practice’s own scene
-                UnityEngine.SceneManagement.SceneManager.LoadScene(practice.sceneName);
+                
             });
         }
     }
