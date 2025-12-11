@@ -81,13 +81,8 @@ public class ValidateExamCodeDto
 {
     public string examCode;
 }
-[System.Serializable]
-public class SubmitSeFinalDto
-{
-    public decimal marks;
-    public bool isPass;
-    public string description;
-}
+
+
 [System.Serializable]
 public class FinalExamPartialDtoResponse
 {
@@ -145,7 +140,87 @@ public class PracticeAttemptTaskResponse
     public bool isPass;
 }
 
+//Final Exam
+[Serializable]
+public class SubmitSeTaskDto
+{
+    public string taskCode;
+    public bool isPass;
+    public int durationSecond;
+}
 
+[Serializable]
+public class SeTaskDto
+{
+    public int id;
+    public int feSimulationId;
+    public string taskCode;
+    public string name;
+    public string description;
+    public bool isPass;
+    public string completeTime;
+    public int durationSecond;
+}
+
+[Serializable]
+public class SubmitSeFinalDto
+{
+    
+    public float marks; 
+    public bool isPass;
+    public string description;
+    public string completeTime;
+
+    
+    public List<SubmitSeTaskDto> tasks;
+}
+[System.Serializable]
+public class FinalExamSubmitDto
+{
+    public int marks;
+    public bool isPass;
+    public string description;
+    public string completeTime;
+}
+[System.Serializable]
+public class FinalExamResponse
+{
+    public int id;
+    public int enrollmentId;
+    public string traineeName;
+    public string traineeCode;
+    public bool isPass;
+    public int totalMarks;
+    public string completeTime;
+    public string examCode;
+    public List<FinalExamPartial> partials;
+}
+[System.Serializable]
+public class FinalExamPartial
+{
+    public int id;
+    public string type;
+    public float marks;
+    public float examWeight;
+    public string description;
+    public int duration;
+    public string startTime;
+    public string endTime;
+    public string completeTime;
+    public string status;
+    public bool isPass;
+    public int? quizId;
+    public string quizName;
+    public int? practiceId;
+    public string practiceName;
+    public List<FinalExamChecklist> checklists;
+
+    public List<SeTaskDto> tasks;
+}
+[System.Serializable]
+public class FinalExamChecklist
+{
+}
 // ---- Generic ApiResponse if you want to parse message field (optional) ----
 [Serializable]
 public class ApiResponse

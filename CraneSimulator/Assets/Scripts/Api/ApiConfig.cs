@@ -3,8 +3,9 @@ using UnityEngine;
 public static class ApiConfig
 {
     // Base URLs (centralized)
-    public static readonly string BaseMainUrl = "https://lssctc.azurewebsites.net/api/";
-    public static readonly string BaseSimulationUrl = "https://lssctc-simulation.azurewebsites.net/api/";
+    //public static readonly string BaseMainUrl = "https://lssctc.azurewebsites.net/api/";
+
+    public static readonly string BaseMainUrl = "https://localhost:7212/api/";
 
     // Endpoints (exact same routes you used)
     public static string Login() => $"{BaseMainUrl}Authens/login-username";
@@ -19,4 +20,5 @@ public static class ApiConfig
     public static string FinalExamSeValidateCode(int partialId) => $"{BaseMainUrl}FinalExams/partial/{partialId}/validate-se-code";
     // 3. POST submit the final exam SE
     public static string FinalExamSeSubmit(int partialId) => $"{BaseMainUrl}FinalExams/submit/se-final/{partialId}";
+    public static string FinalExamSeSubmitTask(int partialId) => $"{BaseMainUrl}FinalExams/submit/se-task/{partialId}";
 }

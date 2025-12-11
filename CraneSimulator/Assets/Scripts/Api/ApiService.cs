@@ -275,18 +275,72 @@ public class ApiService : MonoBehaviour
     }
 
     // 3. POST submit the final exam SE
-    public async Task<string> SubmitFinalExamSeAsync(int partialId, SubmitSeFinalDto submission)
+    public async Task<FinalExamPartial> SubmitFinalExamSeAsync(int partialId, SubmitSeFinalDto submission)
     {
         string url = ApiConfig.FinalExamSeSubmit(partialId);
-
-        
         string raw = await PostRawAsync(url, submission);
 
-        
+
         if (string.IsNullOrEmpty(raw)) return null;
 
-        
-        return raw;
+
+        // API may return error message object
+        if (raw.Contains("\"message\""))
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                Debug.LogError($"SubmitFinalExamSe failed: {err.message}");
+                return null;
+            }
+            catch
+            {
+                Debug.LogError($"SubmitFinalExamSe failed and couldn't parse error. Raw: {raw}");
+                return null;
+            }
+        }
+
+
+        try
+        {
+            // Unity's JsonUtility works best when arrays are represented as arrays.
+            var result = JsonUtility.FromJson<FinalExamPartial>(raw);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse FinalExamResponse: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+    public async Task<SeTaskDto> SubmitFinalExamSeTaskAsync(int partialId, SubmitSeTaskDto submission)
+    {
+        string url = ApiConfig.FinalExamSeSubmitTask(partialId);
+        string raw = await PostRawAsync(url, submission);
+
+        if (string.IsNullOrEmpty(raw)) return null;
+
+        // Check for error message
+        if (raw.Contains("\"message\"") && !raw.Contains("\"id\"")) // Simple check to distinguish error from valid object
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                Debug.LogError($"SubmitFinalExamSeTask failed: {err.message}");
+                return null;
+            }
+            catch { /* Ignore */ }
+        }
+
+        try
+        {
+            return JsonUtility.FromJson<SeTaskDto>(raw);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse SeTaskDto: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
     }
     #endregion
 
