@@ -104,95 +104,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
     }
 
-    //private async Task FinishPracticeAttempt()
-    //{
-    //    int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
-    //    string practiceCode = PlayerPrefs.GetString("selectedPracticeCode", "");
-    //    bool isFinalExam = PlayerPrefs.GetInt("IsFinalExam", 0) == 1;
-    //    if (classId == 0 || string.IsNullOrEmpty(practiceCode))
-    //    {
-    //        Debug.LogError("ClassCode or PracticeCode not set, can't finish attempt.");
-    //        return;
-    //    }
-
-    //    List<PracticeAttemptTaskDto> practiceAttemptTasks = new List<PracticeAttemptTaskDto>();
-    //    int totalScore = 0;
-    //    bool isPassed = false;
-
-    //    if (practiceTaskManager != null)
-    //    {
-    //        // Build attempt from multiple tasks
-    //        foreach (var task in practiceTaskManager.tasks)
-    //        {
-    //            practiceAttemptTasks.Add(new PracticeAttemptTaskDto
-    //            {
-    //                taskCode = task.taskCode,
-    //                score = task.isCompleted ? 100 : 0,
-    //                isPass = task.isCompleted
-    //            });
-    //        }
-    //        totalScore = practiceAttemptTasks.Sum(t => t.score) / practiceAttemptTasks.Count;
-    //        isPassed = practiceAttemptTasks.All(t => t.isPass);
-    //    }
-    //    else if (zigzagPracticeManager != null)
-    //    {
-    //        // Single task/zag practice - just summary pass and score
-    //        totalScore = zigzagPracticeManager.totalPoints;
-    //        isPassed = zigzagPracticeManager.IsCompleted && !zigzagPracticeManager.IsFailed;
-
-    //        practiceAttemptTasks.Add(new PracticeAttemptTaskDto
-    //        {
-    //            taskCode = "TASK_06",   
-    //            score = totalScore,
-    //            isPass = isPassed
-    //        });
-    //    }
-    //    else if (cargoPositioningManager != null)
-    //    {
-    //        // Single task/zag practice - just summary pass and score
-    //        totalScore = cargoPositioningManager.totalPoints;
-    //        isPassed = cargoPositioningManager.IsCompleted && !cargoPositioningManager.IsFailed;
-
-    //        practiceAttemptTasks.Add(new PracticeAttemptTaskDto
-    //        {
-    //            taskCode = "TASK_07",
-    //            score = totalScore,
-    //            isPass = isPassed
-    //        });
-    //    }
-    //    else
-    //    {
-    //        Debug.LogError("No practice manager assigned.");
-    //        return;
-    //    }
-
-    //    var attemptDto = new PracticeAttemptCompleteDto
-    //    {
-    //        classId = classId,
-    //        practiceCode = practiceCode,
-    //        score = totalScore,
-    //        description = isPassed ? "Practice completed successfully" : "Practice failed",
-    //        isPass = isPassed,
-    //        practiceAttemptTasks = practiceAttemptTasks
-    //    };
-
-    //    var response = await ApiService.Instance.CompletePracticeAttemptAsync(attemptDto);
-    //    if (!string.IsNullOrEmpty(response))
-    //    {
-    //        Debug.Log("[DEBUG] Attempt completed: " + response);
-    //        PlayerPrefs.Save();
-
-    //        // Parse response JSON
-    //        var result = JsonUtility.FromJson<PracticeAttemptCompleteResponse>(response);
-
-    //        ShowResult(result);
-    //    }
-
-    //    else
-    //    {
-    //        Debug.LogError("Failed to complete attempt.");
-    //    }
-    //}
+    
     private async Task FinishPracticeAttempt()
     {
         int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
@@ -245,7 +157,7 @@ public class PauseMenu : MonoBehaviour
         else if (zigzagPracticeManager != null)
         {
             // Single task logic
-            calculatedScore = isPassed ? zigzagPracticeManager.totalPoints : 0;
+            calculatedScore = zigzagPracticeManager.totalPoints ;
             isPassed = zigzagPracticeManager.IsCompleted && !zigzagPracticeManager.IsFailed;
 
             string code = "TASK_06"; // Make sure this matches your DB
@@ -261,7 +173,7 @@ public class PauseMenu : MonoBehaviour
         }
         else if (cargoPositioningManager != null)
         {
-            calculatedScore = isPassed ? cargoPositioningManager.totalPoints : 0;
+            calculatedScore = cargoPositioningManager.totalPoints;
             isPassed = cargoPositioningManager.IsCompleted && !cargoPositioningManager.IsFailed;
 
             string code = "TASK_07";

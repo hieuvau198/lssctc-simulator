@@ -47,30 +47,30 @@ public class PracticeListManager : MonoBehaviour
         new PracticeItem {
                 partialId = 0,
                 practiceCode = "PRACTICE_08",
-                practiceName = "Component Inspection",
-                practiceDescription = "Trainee must walk around the crane and inspect all required components including hook block, boom, outriggers, column, and control panel.",
+                practiceName = "Kiểm tra thiết bị",
+                practiceDescription = "Học viên phải đi quanh cần cẩu và kiểm tra tất cả các bộ phận như móc cẩu, cần chính, chân chống, trụ xoay và bảng điều khiển.",
                 estimatedDurationMinutes = 10,
-                difficultyLevel = "Entry",
+                difficultyLevel = "Cơ bản",
                 sceneName = "Practice1"
             },
 
             new PracticeItem {
                 partialId = 0,
                 practiceCode = "PRACTICE_09",
-                practiceName = "Zigzag Cargo Navigation",
-                practiceDescription = "Lift a cargo and move it through a zigzag path without hitting obstacles while keeping the cargo stable.",
+                practiceName = "Điều hướng thùng hàng Ziczac",
+                practiceDescription = "Nâng hàng và di chuyển theo đường ziczac tránh va chạm chướng ngại vật trong khi giữ hàng ổn định.",
                 estimatedDurationMinutes = 15,
-                difficultyLevel = "Intermediate",
+                difficultyLevel = "Trung bình",
                 sceneName = "Practice2"
             },
 
             new PracticeItem {
                 partialId = 0,
                 practiceCode = "PRACTICE_10",
-                practiceName = "Cargo Positioning Challenge",
-                practiceDescription = "Move the cargo and place it accurately inside the designated circle on the ground.",
+                practiceName = "Đặt thùng hàng chính xác",
+                practiceDescription = "Di chuyển hàng và đặt chính xác vào vòng tròn được đánh dấu trên mặt đất.",
                 estimatedDurationMinutes = 8,
-                difficultyLevel = "Entry",
+                difficultyLevel = "Cơ bản",
                 sceneName = "Practice3"
             }
     };
@@ -91,11 +91,11 @@ public class PracticeListManager : MonoBehaviour
         if (dropdown == null) return;
         dropdown.ClearOptions();
         errorText.color = Color.white;
-        errorText.text = "Loading classes...";
+        errorText.text = "Đang tải danh sách lớp...";
         classList = await ApiService.Instance.GetClassesForUserAsync();
         List<string> options = new List<string>();
 
-        options.Add("Select a class..."); // Null/default item
+        options.Add("Chọn lớp..."); // Null/default item
         if (classList != null)
             foreach (var c in classList)
                 options.Add(c.name);
@@ -127,7 +127,7 @@ public class PracticeListManager : MonoBehaviour
         PlayerPrefs.Save();
 
         errorText.color = Color.white;
-        errorText.text = $"Loading practices for: {selectedClass.name}";
+        errorText.text = $"Đang tải bài thực hành cho: {selectedClass.name}";
 
 
         // Get practice list from API
@@ -157,8 +157,8 @@ public class PracticeListManager : MonoBehaviour
             {
                 if (errorText != null)
                 {
-                    errorText.color = Color.red;
-                    errorText.text = "No practices found for this class.";
+                    errorText.color = Color.white;
+                    errorText.text = "Không có bài thực hành hoạt động cho lớp này.";
                 }
                 ClearPracticeCards();
                 return;
@@ -177,8 +177,8 @@ public class PracticeListManager : MonoBehaviour
             {
                 if (errorText != null)
                 {
-                    errorText.color = Color.red;
-                    errorText.text = "No final exam practices available for this class.";
+                    errorText.color = Color.white;
+                    errorText.text = "Không có bài thi cuối kỳ cho lớp này.";
                 }
                 ClearPracticeCards();
                 return;
@@ -196,7 +196,7 @@ public class PracticeListManager : MonoBehaviour
         // Display
         DisplayPractices(uiPractices);
         errorText.color = Color.white;
-        errorText.text = uiPractices.Count == 0 ? "No matching practices found." : "";
+        errorText.text = uiPractices.Count == 0 ? "Không tìm thấy bài phù hợp." : "";
     }
     private void ClearPracticeCards()
     {
@@ -254,8 +254,8 @@ public class PracticeListManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(examCode))
         {
-            errorText.color = Color.red;
-            errorText.text = "Please enter a code.";
+            errorText.color = Color.white;
+            errorText.text = "Vui lòng nhập mã bài thi.";
             return;
         }
 
@@ -266,14 +266,15 @@ public class PracticeListManager : MonoBehaviour
             errorText.text = "System error: partialId missing.";
             return;
         }
-        errorText.text = "Validating exam code...";
+        errorText.text = "Đang xác thực mã bài thi...";
         errorText.color = Color.white;
         object apiResponse = await ApiService.Instance.ValidateFinalExamSeCodeAsync(selectedPracticePartialId, examCode);
 
         if (apiResponse == null)
         {
-            errorText.color = Color.red;
-            errorText.text = "Validation failed. Try again.";
+            errorText.color = Color.white;
+            errorText.text = "Xác thực thất bại. Vui lòng thử lại.";
+            codePopup.SetActive(false);
             return;
         }
 
@@ -282,6 +283,7 @@ public class PracticeListManager : MonoBehaviour
         {
             errorText.color = Color.red;
             errorText.text = err.message;
+            codePopup.SetActive(false);
             return;
         }
         FinalExamPartialDtoResponse exam = apiResponse as FinalExamPartialDtoResponse;

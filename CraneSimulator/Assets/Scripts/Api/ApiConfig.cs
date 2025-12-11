@@ -3,9 +3,9 @@ using UnityEngine;
 public static class ApiConfig
 {
     // Base URLs (centralized)
-    //public static readonly string BaseMainUrl = "https://lssctc.azurewebsites.net/api/";
+    public static readonly string BaseMainUrl = "https://lssctc.azurewebsites.net/api/";
 
-    public static readonly string BaseMainUrl = "https://localhost:7212/api/";
+    //public static readonly string BaseMainUrl = "https://localhost:7212/api/";
 
     // Endpoints (exact same routes you used)
     public static string Login() => $"{BaseMainUrl}Authens/login-username";
