@@ -114,7 +114,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3888736, g: 0.8679245, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2807,7 +2807,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.3882353, g: 0.8666667, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3529,6 +3529,7 @@ MonoBehaviour:
   taskListParent: {fileID: 3221521392216348190}
   taskResultPrefab: {fileID: 1915358752633210479, guid: 4a2e63b93164ebc47ab708ce3d8a96bd, type: 3}
   resultBackButton: {fileID: 2645216381014069617}
+  backgroundAudio: {fileID: 0}
   practiceTaskManager: {fileID: 0}
   zigzagPracticeManager: {fileID: 0}
   cargoPositioningManager: {fileID: 0}

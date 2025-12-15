@@ -98,17 +98,28 @@ public class PracticeAttemptTaskDto
 {
     public string taskCode;
     public int score;
+    public int mistakes;
+    public string description;
     public bool isPass;
 }
 
 [Serializable]
 public class PracticeAttemptCompleteDto
 {
+    public int activityRecordId;
     public int classId;
     public string practiceCode;
+
     public int score;
     public string description;
     public bool isPass;
+
+    public int totalMistakes;
+
+    public string startTime;       
+    public string endTime;         
+    public int durationSeconds;
+
     public List<PracticeAttemptTaskDto> practiceAttemptTasks;
 }
 

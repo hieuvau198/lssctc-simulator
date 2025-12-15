@@ -2134,22 +2134,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1345982821849286446, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1345982821849286446, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1345982821849286446, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 950
-      objectReference: {fileID: 0}
-    - target: {fileID: 1345982821849286446, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -643.3333
-      objectReference: {fileID: 0}
     - target: {fileID: 1773089446835107714, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2230,50 +2214,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6553193774091106031, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6553193774091106031, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6553193774091106031, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 950
-      objectReference: {fileID: 0}
-    - target: {fileID: 6553193774091106031, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -450
-      objectReference: {fileID: 0}
     - target: {fileID: 7600813402803475528, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
       propertyPath: m_Name
       value: Pause (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 7600813402803475528, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
+    - target: {fileID: 8016073863864893667, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
+      propertyPath: backgroundAudio
+      value: 
+      objectReference: {fileID: 464143583}
     - target: {fileID: 8016073863864893667, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
       propertyPath: practiceTaskManager
       value: 
       objectReference: {fileID: 1044224754}
-    - target: {fileID: 9032251347406878460, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9032251347406878460, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 9032251347406878460, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 950
-      objectReference: {fileID: 0}
-    - target: {fileID: 9032251347406878460, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -836.6666
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4976,6 +4928,11 @@ PrefabInstance:
 --- !u!1 &464143582 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3170066833123825940, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+  m_PrefabInstance: {fileID: 464143581}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &464143583 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3327921828174779583, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
   m_PrefabInstance: {fileID: 464143581}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &474963486
@@ -14325,7 +14282,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1421581150
 MonoBehaviour:
   m_ObjectHideFlags: 0

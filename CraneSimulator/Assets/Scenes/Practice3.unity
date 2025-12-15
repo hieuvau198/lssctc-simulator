@@ -12173,8 +12173,8 @@ MonoBehaviour:
   requiredHeight: 1.74
   maxTime: 300
   groundY: 1.72
-  totalPoints: 100
-  polePenalty: 5
+  totalPoints: 10
+  polePenalty: 0.5
 --- !u!1 &1051585898
 GameObject:
   m_ObjectHideFlags: 0
@@ -18632,7 +18632,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1451354239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29116,6 +29116,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+--- !u!82 &73380149406065742 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3327921828174779583, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+  m_PrefabInstance: {fileID: 73380149406065741}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1484601065498402852
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29208,6 +29213,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pause
       objectReference: {fileID: 0}
+    - target: {fileID: 8016073863864893667, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
+      propertyPath: backgroundAudio
+      value: 
+      objectReference: {fileID: 73380149406065742}
     - target: {fileID: 8016073863864893667, guid: 08da2cfc22ff6d6489127e08b8b04a6f, type: 3}
       propertyPath: cargoPositioningManager
       value: 

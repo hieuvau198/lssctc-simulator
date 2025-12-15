@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using System;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -24,7 +25,8 @@ public class PauseMenu : MonoBehaviour
     public GameObject taskResultPrefab; 
 
     public Button resultBackButton;
-
+    [Header("Audio")]
+    public AudioSource backgroundAudio;
     [Header("Practice Manager")]
     public PracticeTaskManager practiceTaskManager; // Reference in scene with multiple tasks
     public ZigzagPracticeManager zigzagPracticeManager; // Reference in zigzag practice scene
@@ -69,25 +71,51 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        // 1. Logic for Losing Focus (Alt-Tab OUT)
+        if (!hasFocus)
+        {
+            // If the game is currently playing (not paused) and we aren't looking at the results screen
+            if (!isPaused && !resultPanel.activeSelf)
+            {
+                Pause();
+            }
+        }
+        // 2. Logic for Gaining Focus (Alt-Tab IN / Coming back)
+        else
+        {
+            // When coming back, if the menu is open OR the result panel is active,
+            // we must force the cursor to be visible/unlocked. 
+            // Otherwise, clicking the window to focus might accidentally lock the cursor.
+            if (isPaused || resultPanel.activeSelf)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+    }
     public void Pause()
     {
         pauseMenuUI.SetActive(true);
         optionsMenuUI.SetActive(false);
         Time.timeScale = 0f;
         isPaused = true;
-
+        if (backgroundAudio != null && backgroundAudio.isPlaying)
+            backgroundAudio.Pause();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
     }
-
     public void Resume()
     {
         pauseMenuUI.SetActive(false);
         optionsMenuUI.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
-
+        if (backgroundAudio != null)
+            backgroundAudio.UnPause();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -107,9 +135,21 @@ public class PauseMenu : MonoBehaviour
     
     private async Task FinishPracticeAttempt()
     {
+        string startTimeStr = PlayerPrefs.GetString("PracticeStartTime", "");
+        DateTimeOffset startTime;
+        if (!DateTimeOffset.TryParse(startTimeStr, out startTime))
+        {
+            Debug.LogWarning("Start time missing, using current time.");
+            startTime = GetVietnamNow();
+        }
+
+        DateTimeOffset endTime = GetVietnamNow();
+
+        int durationSeconds = (int)(endTime - startTime).TotalSeconds;
         int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
         string practiceCode = PlayerPrefs.GetString("selectedPracticeCode", "");
         int partialId = PlayerPrefs.GetInt("selectedPracticePartialId", 0);
+        int activityRecordId = PlayerPrefs.GetInt("activityRecordId", 0);
         bool isFinalExam = PlayerPrefs.GetInt("IsFinalExam", 0) == 1;
 
         if (classId == 0 || string.IsNullOrEmpty(practiceCode))
@@ -124,6 +164,7 @@ public class PauseMenu : MonoBehaviour
 
         float calculatedScore = 0; // Changed to float
         bool isPassed = false;
+        int mistake = 0;
 
         if (practiceTaskManager != null)
         {
@@ -162,7 +203,14 @@ public class PauseMenu : MonoBehaviour
 
             string code = "TASK_06"; // Make sure this matches your DB
 
-            practiceTasks.Add(new PracticeAttemptTaskDto { taskCode = code, score = (int)calculatedScore, isPass = isPassed });
+            mistake = zigzagPracticeManager.TotalMistakes;
+            practiceTasks.Add(new PracticeAttemptTaskDto
+            {
+                taskCode = code,
+                score = Mathf.RoundToInt(calculatedScore),
+                isPass = isPassed,
+                mistakes = zigzagPracticeManager.TotalMistakes
+            });
 
             examTasks.Add(new SubmitSeTaskDto
             {
@@ -177,8 +225,14 @@ public class PauseMenu : MonoBehaviour
             isPassed = cargoPositioningManager.IsCompleted && !cargoPositioningManager.IsFailed;
 
             string code = "TASK_07";
-
-            practiceTasks.Add(new PracticeAttemptTaskDto { taskCode = code, score = (int)calculatedScore, isPass = isPassed });
+            mistake = cargoPositioningManager.TotalMistakes;
+            practiceTasks.Add(new PracticeAttemptTaskDto 
+            { 
+                taskCode = code, 
+                score = (int)calculatedScore,
+                isPass = isPassed ,
+                mistakes = cargoPositioningManager.TotalMistakes
+            });
 
             examTasks.Add(new SubmitSeTaskDto
             {
@@ -205,11 +259,11 @@ public class PauseMenu : MonoBehaviour
             // Create the Final Exam DTO with the list of tasks
             SubmitSeFinalDto dto = new SubmitSeFinalDto
             {
-                marks = calculatedScore / 10.0f, // Normalize if backend expects 0-10, else keep raw
+                marks = calculatedScore ,
                 isPass = isPassed,
                 description = isPassed ? "Exam completed successfully" : "Exam failed",
-                completeTime = System.DateTime.UtcNow.AddHours(7).ToString("o"),
-                tasks = examTasks // <--- SENDING TASKS HERE
+                completeTime = endTime.ToString("o"),
+                tasks = examTasks 
             };
 
             // Call the updated API which returns FinalExamPartial (containing task results)
@@ -229,10 +283,14 @@ public class PauseMenu : MonoBehaviour
             // Standard Practice Submission
             var attemptDto = new PracticeAttemptCompleteDto
             {
+                activityRecordId = activityRecordId,
                 classId = classId,
                 practiceCode = practiceCode,
                 score = (int)calculatedScore,
                 description = isPassed ? "Practice completed successfully" : "Practice failed",
+                startTime = startTime.ToString("o"),
+                endTime = endTime.ToString("o"),
+                totalMistakes = practiceTasks.Sum(t => t.mistakes),
                 isPass = isPassed,
                 practiceAttemptTasks = practiceTasks
             };
@@ -331,5 +389,10 @@ public class PauseMenu : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+    //Helpers
+    private DateTimeOffset GetVietnamNow()
+    {
+        return DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
     }
 }

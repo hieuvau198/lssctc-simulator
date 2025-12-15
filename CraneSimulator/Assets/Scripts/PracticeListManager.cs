@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using System;
 
 public class PracticeListManager : MonoBehaviour
 {
@@ -38,7 +39,8 @@ public class PracticeListManager : MonoBehaviour
         public string practiceDescription;
         public int estimatedDurationMinutes;
         public string difficultyLevel;
-        public string sceneName; 
+        public string sceneName;
+        public int activityRecordId;
     }
 
     // Local dummy data
@@ -130,20 +132,7 @@ public class PracticeListManager : MonoBehaviour
         errorText.text = $"Đang tải bài thực hành cho: {selectedClass.name}";
 
 
-        // Get practice list from API
-        //var apiPractices = await ApiService.Instance.GetPracticesForClassAsync(selectedClass.id);
-        //if (apiPractices == null || apiPractices.Count == 0)
-        //{
-        //    errorText.color = Color.red;
-        //    errorText.text = "No practices found for this class.";
-        //    ClearPracticeCards();
-        //    return;
-        //}
-
-        //// Filter local practices to those whose IDs match API response
-        //var filteredPractices = localPractices.FindAll(
-        //    p => apiPractices.Any(api => api.practiceCode == p.practiceCode)
-        //);
+        
         
 
         // Branch by mode
@@ -164,9 +153,19 @@ public class PracticeListManager : MonoBehaviour
                 return;
             }
 
+            //uiPractices = localPractices
+            //    .Where(lp => apiPractices.Any(api => api.practiceCode == lp.practiceCode))
+            //    .ToList();
+
             uiPractices = localPractices
-                .Where(lp => apiPractices.Any(api => api.practiceCode == lp.practiceCode))
-                .ToList();
+                        .Where(lp => apiPractices.Any(api => api.practiceCode == lp.practiceCode))
+                        .Select(lp =>
+                        {
+                            var match = apiPractices.First(api => api.practiceCode == lp.practiceCode);
+                            lp.activityRecordId = match.activityRecordId; 
+                            return lp;
+                        })
+                        .ToList();
         }
         else
         {
@@ -231,7 +230,10 @@ public class PracticeListManager : MonoBehaviour
                 selectedSceneName = practice.sceneName;
                 selectedPracticePartialId = practice.partialId;
                 PlayerPrefs.SetString("selectedPracticeCode", practice.practiceCode);
+                PlayerPrefs.SetInt("activityRecordId", practice.activityRecordId);
                 PlayerPrefs.SetInt("selectedPracticePartialId", practice.partialId);
+                Debug.Log($"Selected practice: {practice.practiceCode}, Scene: {practice.activityRecordId}, PartialId: {practice.partialId}");
+                SavePracticeStartTime();
                 PlayerPrefs.Save();
                 if (isFinalExam)
 
@@ -298,6 +300,14 @@ public class PracticeListManager : MonoBehaviour
         // Close popup and load scene
         codePopup.SetActive(false);
         LoadPracticeScene();
+    }
+    private void SavePracticeStartTime()
+    {
+        DateTimeOffset vietnamTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
+
+        PlayerPrefs.SetString("PracticeStartTime", vietnamTime.ToString("o"));
+        PlayerPrefs.Save();
+
     }
 
     private void LoadPracticeScene()
