@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using System;
+using System.Collections;
 
 public class PauseMenu : MonoBehaviour
 {
@@ -32,6 +33,12 @@ public class PauseMenu : MonoBehaviour
     public ZigzagPracticeManager zigzagPracticeManager; // Reference in zigzag practice scene
     public CargoPositioningManager cargoPositioningManager; // Reference in cargo positioning practice scene
 
+    [Header("External UI Managers")]
+    public TutorialManager tutorialManager;       
+    public SelectionManager selectionManager;      
+    public ZigzagPracticeUI zigzagUI;               
+    public PracticeTaskManager practiceUI;          
+    public CargoPositioningUI cargoUI;
     private bool isPaused = false;
 
     private void Start()
@@ -62,39 +69,87 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && isPaused == false)
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (isPaused)
                 Resume();
             else
                 Pause();
         }
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            StartCoroutine(RestoreCursorState());
+        }
     }
 
-    
+
     private void OnApplicationFocus(bool hasFocus)
     {
-        // 1. Logic for Losing Focus (Alt-Tab OUT)
         if (!hasFocus)
         {
-            // If the game is currently playing (not paused) and we aren't looking at the results screen
             if (!isPaused && !resultPanel.activeSelf)
             {
                 Pause();
             }
         }
-        // 2. Logic for Gaining Focus (Alt-Tab IN / Coming back)
         else
         {
-            // When coming back, if the menu is open OR the result panel is active,
-            // we must force the cursor to be visible/unlocked. 
-            // Otherwise, clicking the window to focus might accidentally lock the cursor.
-            if (isPaused || resultPanel.activeSelf)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
+            StartCoroutine(RestoreCursorState());
         }
+    }
+
+    private IEnumerator RestoreCursorState()
+    {
+        yield return new WaitForEndOfFrame();
+        RefreshCursorState();
+    }
+
+
+    public void RefreshCursorState()
+    {
+        if (pauseMenuUI.activeSelf || resultPanel.activeSelf)
+        {
+            SetCursor(true);
+            return;
+        }
+
+        if (tutorialManager != null && tutorialManager.tutorialPanel.activeSelf)
+        {
+            SetCursor(true);
+            return;
+        }
+
+        if (zigzagUI != null && zigzagUI.panel.activeSelf)
+        {
+            SetCursor(true);
+            return;
+        }
+
+        if (practiceUI != null && practiceUI.taskPanel.activeSelf)
+        {
+            SetCursor(true);
+            return;
+        }
+
+        if (cargoUI != null && cargoUI.panel.activeSelf)
+        {
+            SetCursor(true);
+            return;
+        }
+
+        if (selectionManager != null && selectionManager.IsAnyPanelOpen())
+        {
+            SetCursor(true);
+            return;
+        }
+
+        SetCursor(false);
+    }
+
+    private void SetCursor(bool unlocked)
+    {
+        Cursor.visible = unlocked;
+        Cursor.lockState = unlocked ? CursorLockMode.None : CursorLockMode.Locked;
     }
     public void Pause()
     {
@@ -104,8 +159,7 @@ public class PauseMenu : MonoBehaviour
         isPaused = true;
         if (backgroundAudio != null && backgroundAudio.isPlaying)
             backgroundAudio.Pause();
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        SetCursor(true);
 
     }
     public void Resume()
@@ -116,8 +170,7 @@ public class PauseMenu : MonoBehaviour
         isPaused = false;
         if (backgroundAudio != null)
             backgroundAudio.UnPause();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        RefreshCursorState();
     }
 
     public void OpenOptions()

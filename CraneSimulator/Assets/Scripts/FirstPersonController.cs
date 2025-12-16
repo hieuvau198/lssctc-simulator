@@ -73,8 +73,8 @@ namespace StarterAssets
 		private GameObject _mainCamera;
 
 		private const float _threshold = 0.01f;
-
-		private bool IsCurrentDeviceMouse
+        public static bool CanLook = true;
+        private bool IsCurrentDeviceMouse
 		{
 			get
 			{
@@ -112,14 +112,16 @@ namespace StarterAssets
 
 		private void Update()
 		{
-			JumpAndGravity();
+            if (!CanLook) return;
+            JumpAndGravity();
 			GroundedCheck();
 			Move();
 		}
 
 		private void LateUpdate()
 		{
-			CameraRotation();
+            if (!CanLook) return;
+            CameraRotation();
 		}
 
 		private void GroundedCheck()
@@ -131,8 +133,9 @@ namespace StarterAssets
 
 		private void CameraRotation()
 		{
-			// if there is an input
-			if (_input.look.sqrMagnitude >= _threshold)
+            if (!CanLook) return;
+            // if there is an input
+            if (_input.look.sqrMagnitude >= _threshold)
 			{
 				//Don't multiply mouse input by Time.deltaTime
 				float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
