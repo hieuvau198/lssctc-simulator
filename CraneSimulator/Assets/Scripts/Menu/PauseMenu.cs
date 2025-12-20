@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Threading.Tasks;
@@ -40,6 +40,10 @@ public class PauseMenu : MonoBehaviour
     public PracticeTaskManager practiceUI;          
     public CargoPositioningUI cargoUI;
     private bool isPaused = false;
+
+
+    private bool hasSubmitted = false;
+    private bool isQuitting = false;
 
     private void Start()
     {
@@ -97,6 +101,15 @@ public class PauseMenu : MonoBehaviour
             StartCoroutine(RestoreCursorState());
         }
     }
+
+    private void OnApplicationQuit()
+    {
+        if (hasSubmitted) return;
+        isQuitting = true;
+        SubmitFailOnQuit();
+    }
+
+    
 
     private IEnumerator RestoreCursorState()
     {
@@ -188,6 +201,9 @@ public class PauseMenu : MonoBehaviour
     
     private async Task FinishPracticeAttempt()
     {
+        if (hasSubmitted) return;
+        hasSubmitted = true;
+
         string startTimeStr = PlayerPrefs.GetString("PracticeStartTime", "");
         DateTimeOffset startTime;
         if (!DateTimeOffset.TryParse(startTimeStr, out startTime))
@@ -315,6 +331,7 @@ public class PauseMenu : MonoBehaviour
                 marks = calculatedScore ,
                 isPass = isPassed,
                 description = isPassed ? "Exam completed successfully" : "Exam failed",
+                startTime = startTime.ToString("o"),
                 completeTime = endTime.ToString("o"),
                 tasks = examTasks 
             };
@@ -362,6 +379,139 @@ public class PauseMenu : MonoBehaviour
             }
         }
     }
+    private void SubmitFailOnQuit()
+    {
+        try
+        {
+            if (hasSubmitted) return;
+            hasSubmitted = true;
+
+            bool isFinalExam = PlayerPrefs.GetInt("IsFinalExam", 0) == 1;
+
+            int classId = PlayerPrefs.GetInt("SelectedClassId", 0);
+            string practiceCode = PlayerPrefs.GetString("selectedPracticeCode", "");
+            int activityRecordId = PlayerPrefs.GetInt("activityRecordId", 0);
+            int partialId = PlayerPrefs.GetInt("selectedPracticePartialId", 0);
+
+            if (classId == 0 || string.IsNullOrEmpty(practiceCode))
+                return;
+
+            DateTimeOffset endTime = GetVietnamNow();
+
+            
+            List<PracticeAttemptTaskDto> practiceTasks = new();
+            List<SubmitSeTaskDto> examTasks = new();
+
+            
+            if (practiceTaskManager != null)
+            {
+                foreach (var task in practiceTaskManager.tasks)
+                {
+                    practiceTasks.Add(new PracticeAttemptTaskDto
+                    {
+                        taskCode = task.taskCode,
+                        score = 0,
+                        isPass = false,
+                        mistakes = 0
+                    });
+
+                    examTasks.Add(new SubmitSeTaskDto
+                    {
+                        taskCode = task.taskCode,
+                        isPass = false,
+                        durationSecond = 0
+                    });
+                }
+            }
+            
+            else if (zigzagPracticeManager != null)
+            {
+                string code = "TASK_06";
+
+                practiceTasks.Add(new PracticeAttemptTaskDto
+                {
+                    taskCode = code,
+                    score = 0,
+                    isPass = false,
+                    mistakes = zigzagPracticeManager.TotalMistakes
+                });
+
+                examTasks.Add(new SubmitSeTaskDto
+                {
+                    taskCode = code,
+                    isPass = false,
+                    durationSecond = (int)Time.timeSinceLevelLoad
+                });
+            }
+            
+            else if (cargoPositioningManager != null)
+            {
+                string code = "TASK_07";
+
+                practiceTasks.Add(new PracticeAttemptTaskDto
+                {
+                    taskCode = code,
+                    score = 0,
+                    isPass = false,
+                    mistakes = cargoPositioningManager.TotalMistakes
+                });
+
+                examTasks.Add(new SubmitSeTaskDto
+                {
+                    taskCode = code,
+                    isPass = false,
+                    durationSecond = (int)Time.timeSinceLevelLoad
+                });
+            }
+            else
+            {
+                Debug.LogWarning("❌ Không tìm thấy Practice Manager để submit fail.");
+                return;
+            }
+
+            
+            if (isFinalExam)
+            {
+                if (partialId == 0) return;
+
+                SubmitSeFinalDto dto = new SubmitSeFinalDto
+                {
+                    marks = 0,
+                    isPass = false,
+                    description = "Bài thi thất bại (Thoát ứng dụng)",
+                    startTime = PlayerPrefs.GetString("PracticeStartTime", endTime.ToString("o")),
+                    completeTime = endTime.ToString("o"),
+                    tasks = examTasks
+                };
+
+                // Fire & Forget (không await khi quit)
+                _ = ApiService.Instance.SubmitFinalExamSeAsync(partialId, dto);
+            }
+            else
+            {
+                PracticeAttemptCompleteDto dto = new PracticeAttemptCompleteDto
+                {
+                    activityRecordId = activityRecordId,
+                    classId = classId,
+                    practiceCode = practiceCode,
+                    score = 0,
+                    description = "Bài thực hành thất bại (Thoát ứng dụng)",
+                    startTime = PlayerPrefs.GetString("PracticeStartTime", endTime.ToString("o")),
+                    endTime = endTime.ToString("o"),
+                    totalMistakes = practiceTasks.Sum(t => t.mistakes),
+                    isPass = false,
+                    practiceAttemptTasks = practiceTasks
+                };
+
+                _ = ApiService.Instance.CompletePracticeAttemptAsync(dto);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Lỗi khi submit fail on quit: " + ex.Message);
+        }
+    }
+
     private void ShowResult(PracticeAttemptCompleteResponse result)
     {
         // Freeze game
@@ -383,7 +533,7 @@ public class PauseMenu : MonoBehaviour
         {
             GameObject item = Instantiate(taskResultPrefab, taskListParent);
 
-            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.taskCode;
+            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.description;
             item.transform.Find("TaskScore").GetComponent<TextMeshProUGUI>().text = "Score: " + task.score;
             item.transform.Find("TaskStatus").GetComponent<TextMeshProUGUI>().text =
                 task.isPass ? "Pass" : "Fail";

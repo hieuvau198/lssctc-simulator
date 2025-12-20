@@ -180,6 +180,7 @@ public class SubmitSeFinalDto
     public float marks; 
     public bool isPass;
     public string description;
+    public string startTime;
     public string completeTime;
 
     

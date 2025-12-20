@@ -27,7 +27,10 @@ public class BoomForward : MonoBehaviour
     public float extendSpeed = 2f;
     private bool boomFor_Bool = true;
 
-    
+    [Header("Audio")]
+    public AudioSource moveAudio;
+
+
     void Start()
     {
         
@@ -48,17 +51,20 @@ public class BoomForward : MonoBehaviour
 
     void Update()
     {
+        bool isMoving = false;
         if (Input.GetKey(extendKey))
         {
             boomFor_Bool = false;
             BoomMoveForward();
+            isMoving = true;
         }
         else if (Input.GetKey(retractKey))
         {
             boomFor_Bool = true;
             BoomMoveForward();
+            isMoving = true;
         }
-        
+        HandleMovementSound(isMoving);
     }
     private void BoomMoveForward()
     {
@@ -80,6 +86,19 @@ public class BoomForward : MonoBehaviour
             {
                 boom2.localPosition = Vector3.MoveTowards(boom2.localPosition, maxBoom_2, extendSpeed * Time.deltaTime);
             }
+        }
+    }
+    private void HandleMovementSound(bool isMoving)
+    {
+        if (isMoving)
+        {
+            if (!moveAudio.isPlaying)
+                moveAudio.Play();
+        }
+        else
+        {
+            if (moveAudio.isPlaying)
+                moveAudio.Stop();
         }
     }
     //private void UpdateRope()

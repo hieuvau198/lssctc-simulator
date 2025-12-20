@@ -15,6 +15,9 @@ public class OutTriggerRight : MonoBehaviour
     public KeyCode extendKey = KeyCode.UpArrow;
     public KeyCode retractKey = KeyCode.DownArrow;
 
+    [Header("Audio")]
+    public AudioSource moveAudio;
+
     private Vector3 armStartPos;
     private Vector3 legStartPos;
     private bool extendingHeld;
@@ -28,13 +31,27 @@ public class OutTriggerRight : MonoBehaviour
 
     void Update()
     {
-        extendingHeld = Input.GetKey(extendKey);
-        retractingHeld = Input.GetKey(retractKey);
+        //extendingHeld = Input.GetKey(extendKey);
+        //retractingHeld = Input.GetKey(retractKey);
 
-        if (extendingHeld)
+        //if (extendingHeld)
+        //    ExtendManual();
+        //else if (retractingHeld)
+        //    RetractManual();
+        bool isMoving = false;
+
+        if (Input.GetKey(extendKey))
+        {
             ExtendManual();
-        else if (retractingHeld)
+            isMoving = true;
+        }
+        else if (Input.GetKey(retractKey))
+        {
             RetractManual();
+            isMoving = true;
+        }
+
+        HandleMovementSound(isMoving);
     }
 
     private void ExtendManual()
@@ -80,6 +97,19 @@ public class OutTriggerRight : MonoBehaviour
                 armStartPos,
                 moveSpeed * Time.deltaTime
             );
+        }
+    }
+    private void HandleMovementSound(bool isMoving)
+    {
+        if (isMoving)
+        {
+            if (!moveAudio.isPlaying)
+                moveAudio.Play();
+        }
+        else
+        {
+            if (moveAudio.isPlaying)
+                moveAudio.Stop();
         }
     }
 }

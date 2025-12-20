@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
+using StarterAssets;
 
 public class OptionsMenu : MonoBehaviour
 {
@@ -10,39 +12,115 @@ public class OptionsMenu : MonoBehaviour
     public Slider soundSlider;
     public TextMeshProUGUI soundValueText;
 
-    [Header("Settings")]
+    [Header("Audio Sources")]
+    public List<AudioSource> audioSources = new List<AudioSource>();
+
+    [Header("Player Controller")]
+    public FirstPersonController playerController;
+
+    [Header("Default Settings")]
     [Range(0.1f, 10f)] public float defaultSensitivity = 1f;
     [Range(0f, 1f)] public float defaultSoundVolume = 1f;
 
+    // Saved values
+    private float savedSensitivity;
+    private float savedSound;
+
+    // Preview values
+    private float previewSensitivity;
+    private float previewSound;
+
     private void Start()
     {
-        // Load saved preferences
-        float savedSensitivity = PlayerPrefs.GetFloat("sensitivity", defaultSensitivity);
-        float savedSound = PlayerPrefs.GetFloat("soundVolume", defaultSoundVolume);
+        // Load SAVED values
+        savedSensitivity = PlayerPrefs.GetFloat("sensitivity", defaultSensitivity);
+        savedSound = PlayerPrefs.GetFloat("soundVolume", defaultSoundVolume);
 
+        // Set sliders to saved values
         sensitivitySlider.value = savedSensitivity;
         soundSlider.value = savedSound;
+
+        // Apply saved values
+        ApplySensitivity(savedSensitivity);
+        ApplySound(savedSound);
 
         UpdateSensitivityText(savedSensitivity);
         UpdateSoundText(savedSound);
 
-        // Listeners
-        sensitivitySlider.onValueChanged.AddListener(OnSensitivityChanged);
-        soundSlider.onValueChanged.AddListener(OnSoundChanged);
+        // Listeners (PREVIEW only)
+        sensitivitySlider.onValueChanged.AddListener(OnSensitivityPreview);
+        soundSlider.onValueChanged.AddListener(OnSoundPreview);
     }
 
-    private void OnSensitivityChanged(float value)
+    // ===================== PREVIEW =====================
+
+    private void OnSensitivityPreview(float value)
     {
-        UpdateSensitivityText(value);
-        PlayerPrefs.SetFloat("sensitivity", value);
+        previewSensitivity = value;
+        ApplySensitivity(previewSensitivity);
+        UpdateSensitivityText(previewSensitivity);
     }
 
-    private void OnSoundChanged(float value)
+    private void OnSoundPreview(float value)
     {
-        UpdateSoundText(value);
-        AudioListener.volume = value;
-        PlayerPrefs.SetFloat("soundVolume", value);
+        previewSound = value;
+        ApplySound(previewSound);
+        UpdateSoundText(previewSound);
     }
+
+    // ===================== APPLY =====================
+
+    private void ApplySensitivity(float value)
+    {
+        if (playerController != null)
+        {
+            playerController.RotationSpeed = value;
+        }
+    }
+
+    private void ApplySound(float value)
+    {
+        foreach (AudioSource source in audioSources)
+        {
+            if (source != null)
+            {
+                source.volume = value;
+            }
+        }
+    }
+
+    // ===================== SAVE =====================
+
+    public void SaveChanges()
+    {
+        savedSensitivity = sensitivitySlider.value;
+        savedSound = soundSlider.value;
+
+        PlayerPrefs.SetFloat("sensitivity", savedSensitivity);
+        PlayerPrefs.SetFloat("soundVolume", savedSound);
+        PlayerPrefs.Save();
+
+        Debug.Log("Options saved.");
+    }
+
+    // ===================== CANCEL / CLOSE =====================
+
+    public void CancelChanges()
+    {
+        // Revert to saved values
+        sensitivitySlider.value = savedSensitivity;
+        soundSlider.value = savedSound;
+
+        ApplySensitivity(savedSensitivity);
+        ApplySound(savedSound);
+
+        UpdateSensitivityText(savedSensitivity);
+        UpdateSoundText(savedSound);
+
+        Debug.Log("Options reverted.");
+    }
+
+    // ===================== UI TEXT =====================
 
     private void UpdateSensitivityText(float value)
     {
@@ -51,12 +129,6 @@ public class OptionsMenu : MonoBehaviour
 
     private void UpdateSoundText(float value)
     {
-        soundValueText.text = $"{(int)(value * 100)}%";
-    }
-
-    public void ApplySettings()
-    {
-        PlayerPrefs.Save();
-        Debug.Log("Settings saved.");
+        soundValueText.text = $"{Mathf.RoundToInt(value * 100)}%";
     }
 }
