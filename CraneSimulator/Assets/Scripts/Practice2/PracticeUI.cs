@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class PracticeUI : MonoBehaviour
@@ -10,7 +10,7 @@ public class PracticeUI : MonoBehaviour
     void Update()
     {
         if (!manager) return;
-        scoreText.text = "Score: " + manager.totalPoints;
-        timerText.text = "Time: " + Time.timeSinceLevelLoad.ToString("F1") + "s";
+        scoreText.text = "Điểm: " + manager.totalPoints;
+        timerText.text = "Thời gian: " + Time.timeSinceLevelLoad.ToString("F1") + "s";
     }
 }

@@ -14,12 +14,15 @@ public class HookBlockController : MonoBehaviour
     public float ropeSpeed = 0.25f;
 
     [Header("Key Controls")]
-    public KeyCode dropKey = KeyCode.N;       // Extend rope (drop)
-    public KeyCode retractKey = KeyCode.M;    // Retract rope (pull up)
+    public KeyCode dropKey = KeyCode.DownArrow;       // Extend rope (drop)
+    public KeyCode retractKey = KeyCode.UpArrow;    // Retract rope (pull up)
 
     [Header("Joint Settings")]
     public float jointSpring = 50f;           // Rope stiffness
     public float jointDamper = 5f;            // Rope damping
+
+    [Header("Audio")]
+    public AudioSource moveAudio;
 
     private ConfigurableJoint ropeJoint;
     private float currentLength;
@@ -78,6 +81,7 @@ public class HookBlockController : MonoBehaviour
         HandleInput();
         UpdateRopeLength();
         UpdateRopeVisual();
+        HandleMovementSound(IsRopeMoving());
     }
 
     private void HandleInput()
@@ -106,5 +110,24 @@ public class HookBlockController : MonoBehaviour
 
         ropeRenderer.SetPosition(0, ropeStartPoint.position);
         ropeRenderer.SetPosition(1, ropeEndPoint.position);
+    }
+
+    public bool IsRopeMoving()
+    {
+        return Input.GetKey(dropKey) || Input.GetKey(retractKey);
+    }
+
+    private void HandleMovementSound(bool isMoving)
+    {
+        if (isMoving)
+        {
+            if (!moveAudio.isPlaying)
+                moveAudio.Play();
+        }
+        else
+        {
+            if (moveAudio.isPlaying)
+                moveAudio.Stop();
+        }
     }
 }

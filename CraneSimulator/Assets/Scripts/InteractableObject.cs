@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class InteractableObject : MonoBehaviour
 {
-    public int ItemID;
+    public string ItemCode;
     public MonoBehaviour controlScript;
 
     //private Renderer objectRenderer;
@@ -36,9 +36,9 @@ public class InteractableObject : MonoBehaviour
 
     
 
-    public int GetItemID()
+    public string GetItemCode()
     {
-        return ItemID;
+        return ItemCode;
     }
 
     

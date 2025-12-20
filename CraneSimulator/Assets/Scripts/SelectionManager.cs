@@ -15,8 +15,12 @@ public class SelectionManager : MonoBehaviour
     public TextMeshProUGUI descriptionText;
     public UnityEngine.UI.Image componentImage;
 
-    
-
+    [Header("Key Icon Prefabs")]
+    public GameObject ArrowUpPrefab;
+    public GameObject ArrowDownPrefab;
+    public GameObject ArrowLeftPrefab;
+    public GameObject ArrowRightPrefab;
+    private const string ICON_PLACEHOLDER = "<ICON>";
     [Header("Cameras")]
     public Camera playerCamera;
     public GameObject craneCamera;
@@ -41,9 +45,7 @@ public class SelectionManager : MonoBehaviour
     private bool isQuizOpen;
     private bool isTaskOpen;
 
-    // =========================== //
-    // ==== Unity Life Cycle  ==== //
-    // =========================== //
+   
     private void Start()
     {
         interactionText = interactionInfoUI.GetComponent<TextMeshProUGUI>();
@@ -160,7 +162,8 @@ public class SelectionManager : MonoBehaviour
         interactionInfoUI.SetActive(false);
 
         string hint = GetHintForControl(controlledScript);
-        ControlHintUI.Instance?.ShowHint(hint);
+        string[] keys = GetKeysForControl(controlledScript);
+        ControlHintUI.Instance?.ShowHint(hint, keys, this);
     }
 
     private void ExitControlMode()
@@ -189,29 +192,29 @@ public class SelectionManager : MonoBehaviour
         itemInfoCardUI.SetActive(true);
         currentAnimation = StartCoroutine(ScaleRectTransform(itemInfoCardUI.transform, Vector3.zero, Vector3.one, 0.3f));
 
-        idText.text = "Loading...";
+        idText.text = "Đang tải...";
         nameText.text = descriptionText.text = "";
         componentImage.sprite = null;
         if(practiceTaskManager != null)
         {
-            practiceTaskManager.MarkTaskAsDone(item.ItemID);
+            practiceTaskManager.MarkTaskAsDone(item.ItemCode);
         }
-        var data = await ApiService.Instance.GetComponentByIdAsync(item.GetItemID());
+        var data = await ApiService.Instance.GetComponentByCodeAsync(item.GetItemCode());
 
         if (data != null)
         {
 
-            idText.text = $"ID: {data.id}";
-            nameText.text = $"Name: {data.name}";
-            descriptionText.text = $"Description: {data.description}";
+            idText.text = $"Mã: {data.id}";
+            nameText.text = $"Tên: {data.name}";
+            descriptionText.text = $"Mô tả: {data.description}";
             if (!string.IsNullOrEmpty(data.imageUrl))
                 StartCoroutine(LoadImage(data.imageUrl));
         }
         else
         {
-            idText.text = "Error";
-            nameText.text = "Could not load";
-            descriptionText.text = "";
+            idText.text = "Lỗi";
+            nameText.text = "Không thể tải dữ liệu";
+            descriptionText.text = "Vui lòng thử lại.";
         }
     }
 
@@ -294,18 +297,56 @@ public class SelectionManager : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
     }
-
-    private string GetHintForControl(MonoBehaviour script)
+    public GameObject GetPrefabForControlKey(string keyName)
     {
+        switch (keyName)
+        {
+            case "UpArrow": return ArrowUpPrefab;
+            case "DownArrow": return ArrowDownPrefab;
+            case "LeftArrow": return ArrowLeftPrefab;
+            case "RightArrow": return ArrowRightPrefab;
+            default: return null;
+        }
+    }
+    private string[] GetKeysForControl(MonoBehaviour script)
+    {
+        // Ensure you call .ToString() on all KeyCode properties
         return script switch
         {
-            BoomForward bf => $"[ {bf.extendKey} ] Extend  |  [ {bf.retractKey} ] Retract",
-            BoomController bc => $"[ {bc.upBoom} ] Boom Up  |  [ {bc.downBoom} ] Boom Down",
-            RotationColumn rc => $"[ {rc.leftRotationColumn} ] Rotate Left  |  [ {rc.rightRotationColumn} ] Rotate Right",
-            OutTriggerLeft otl => $"[ {otl.extendKey} ] Extend Left Trigger  |  [ {otl.retractKey} ] Retract",
-            OutTriggerRight otr => $"[ {otr.extendKey} ] Extend Right Trigger  |  [ {otr.retractKey} ] Retract",
-            HookBlockController hook => $"[ {hook.dropKey} ] Drop Hook  |  [ {hook.retractKey} ] Raise Hook",
-            _ => "Use assigned control keys to operate this component."
+            BoomForward bf => new[] { bf.extendKey.ToString(), bf.retractKey.ToString() },
+            BoomController bc => new[] { bc.upBoom.ToString(), bc.downBoom.ToString() },
+            RotationColumn rc => new[] { rc.leftRotationColumn.ToString(), rc.rightRotationColumn.ToString() },
+            OutTriggerLeft otl => new[] { otl.extendKey.ToString(), otl.retractKey.ToString() },
+            OutTriggerRight otr => new[] { otr.extendKey.ToString(), otr.retractKey.ToString() },
+            HookBlockController hook => new[] { hook.dropKey.ToString(), hook.retractKey.ToString() },
+            _ => new string[0]
         };
     }
+    private string GetHintForControl(MonoBehaviour script)
+    {
+        // The ICON_PLACEHOLDER replaces the key text (e.g., "[ UpArrow ]")
+        return script switch
+        {
+            BoomForward bf => $"{ICON_PLACEHOLDER} Đẩy cần ra  |  {ICON_PLACEHOLDER} Thu cần vào",
+            BoomController bc => $"{ICON_PLACEHOLDER} Nâng cần  |  {ICON_PLACEHOLDER} Hạ cần",
+            RotationColumn rc => $"{ICON_PLACEHOLDER} Quay trái  |  {ICON_PLACEHOLDER} Quay phải",
+            OutTriggerLeft otl => $"{ICON_PLACEHOLDER} Mở chân chống trái  |  {ICON_PLACEHOLDER} Thu vào",
+            OutTriggerRight otr => $"{ICON_PLACEHOLDER} Mở chân chống phải  |  {ICON_PLACEHOLDER} Thu vào",
+            HookBlockController hook => $"{ICON_PLACEHOLDER} Hạ móc  |  {ICON_PLACEHOLDER} Nâng móc",
+            _ => "Sử dụng các phím điều khiển được chỉ định để vận hành bộ phận này."
+        };
+    }
+    //private string GetHintForControl(MonoBehaviour script)
+    //{
+    //    return script switch
+    //    {
+    //        BoomForward bf => $"[ {bf.extendKey} ] Đẩy cần ra  |  [ {bf.retractKey} ] Thu cần vào",
+    //        BoomController bc => $"[ {bc.upBoom} ] Nâng cần  |  [ {bc.downBoom} ] Hạ cần",
+    //        RotationColumn rc => $"[ {rc.leftRotationColumn} ] Quay trái  |  [ {rc.rightRotationColumn} ] Quay phải",
+    //        OutTriggerLeft otl => $"[ {otl.extendKey} ] Mở chân chống trái  |  [ {otl.retractKey} ] Thu vào",
+    //        OutTriggerRight otr => $"[ {otr.extendKey} ] Mở chân chống phải  |  [ {otr.retractKey} ] Thu vào",
+    //        HookBlockController hook => $"[ {hook.dropKey} ] Hạ móc  |  [ {hook.retractKey} ] Nâng móc",
+    //        _ => "Sử dụng các phím điều khiển được chỉ định để vận hành bộ phận này."
+    //    };
+    //}
 }

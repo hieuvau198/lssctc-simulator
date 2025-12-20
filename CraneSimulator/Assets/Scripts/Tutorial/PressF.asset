@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81611f17cf9608f45ab5acc5d8e9bf9b, type: 3}
+  m_Name: PressF
+  m_EditorClassIdentifier: 
+  title: "S\u1EED d\u1EE5ng c\u1EA7n g\u1EA1t"
+  description: "Nh\u1EA5n \"F\" v\xE0o c\u1EA7n g\u1EA1t \u0111\u1EC3 s\u1EED d\u1EE5ng"
+  image: {fileID: 21300000, guid: 22831d7156467834abfe2974c405bb97, type: 3}

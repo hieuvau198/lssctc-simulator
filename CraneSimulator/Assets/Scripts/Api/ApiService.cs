@@ -172,14 +172,16 @@ public class ApiService : MonoBehaviour
     {
         string raw = await GetRawAsync(ApiConfig.PracticesForClass(classId));
         if (string.IsNullOrEmpty(raw)) return null;
-        PracticeDto[] practices = JsonUtility.FromJson<PracticeDtoArrayWrapper>("{\"items\":" + raw + "}").items;
+        PracticeDtoArrayWrapper wrapper = JsonUtility.FromJson<PracticeDtoArrayWrapper>(raw);
+        PracticeDto[] practices = wrapper.data;
         return new List<PracticeDto>(practices);
     }
     [Serializable]
-    private class PracticeDtoArrayWrapper 
-    { 
-        public PracticeDto[] items; 
+    private class PracticeDtoArrayWrapper
+    {
+        public PracticeDto[] data;
     }
+
     //Finish Practice attempt
     public async Task<string> CompletePracticeAttemptAsync(PracticeAttemptCompleteDto attempt)
     {
@@ -206,11 +208,139 @@ public class ApiService : MonoBehaviour
     }
 
 
-    public async Task<ComponentDto> GetComponentByIdAsync(int id)
+    public async Task<ComponentDto> GetComponentByCodeAsync(string code)
     {
-        string raw = await GetRawAsync(ApiConfig.ComponentById(id));
+        string raw = await GetRawAsync(ApiConfig.ComponentByCode(code));
         if (string.IsNullOrEmpty(raw)) return null;
         return JsonUtility.FromJson<ComponentDto>(raw);
+    }
+    [Serializable]
+    private class SePracticeListArrayWrapper
+    {
+        public SePracticeListDto[] items;
+    }
+    public async Task<List<SePracticeListDto>> GetFinalExamSePracticesAsync(int classId)
+    {
+        string url = ApiConfig.FinalExamSePractices(classId);
+        string raw = await GetRawAsync(url);
+
+        if (string.IsNullOrEmpty(raw) || raw == "[]") return new List<SePracticeListDto>();
+
+        
+
+        try
+        {
+            
+            var wrappedJson = "{\"items\":" + raw + "}";
+            SePracticeListDto[] practices = JsonUtility.FromJson<SePracticeListArrayWrapper>(wrappedJson).items;
+            return new List<SePracticeListDto>(practices);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse SE Practice List from API: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+
+    // 2. POST check the available Exam code when start the practice in the simulation
+    public async Task<object> ValidateFinalExamSeCodeAsync(int partialId, string examCode)
+    {
+        string url = ApiConfig.FinalExamSeValidateCode(partialId);
+        var body = new ValidateExamCodeDto { examCode = examCode };
+
+        string raw = await PostRawAsync(url, body);
+
+        if (string.IsNullOrEmpty(raw)) return null;
+        if (raw.Contains("\"message\""))
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                return err;
+            }
+            catch
+            {
+                return new ErrorMessageDto { message = "Unknown error" };
+            }
+        }
+        try
+        {
+            return JsonUtility.FromJson<FinalExamPartialDtoResponse>(raw);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse Validate SE Code response: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+
+    // 3. POST submit the final exam SE
+    public async Task<FinalExamPartial> SubmitFinalExamSeAsync(int partialId, SubmitSeFinalDto submission)
+    {
+        string url = ApiConfig.FinalExamSeSubmit(partialId);
+        string raw = await PostRawAsync(url, submission);
+
+
+        if (string.IsNullOrEmpty(raw)) return null;
+
+
+        // API may return error message object
+        if (raw.Contains("\"message\""))
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                Debug.LogError($"SubmitFinalExamSe failed: {err.message}");
+                return null;
+            }
+            catch
+            {
+                Debug.LogError($"SubmitFinalExamSe failed and couldn't parse error. Raw: {raw}");
+                return null;
+            }
+        }
+
+
+        try
+        {
+            // Unity's JsonUtility works best when arrays are represented as arrays.
+            var result = JsonUtility.FromJson<FinalExamPartial>(raw);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse FinalExamResponse: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
+    }
+    public async Task<SeTaskDto> SubmitFinalExamSeTaskAsync(int partialId, SubmitSeTaskDto submission)
+    {
+        string url = ApiConfig.FinalExamSeSubmitTask(partialId);
+        string raw = await PostRawAsync(url, submission);
+
+        if (string.IsNullOrEmpty(raw)) return null;
+
+        // Check for error message
+        if (raw.Contains("\"message\"") && !raw.Contains("\"id\"")) // Simple check to distinguish error from valid object
+        {
+            try
+            {
+                var err = JsonUtility.FromJson<ErrorMessageDto>(raw);
+                Debug.LogError($"SubmitFinalExamSeTask failed: {err.message}");
+                return null;
+            }
+            catch { /* Ignore */ }
+        }
+
+        try
+        {
+            return JsonUtility.FromJson<SeTaskDto>(raw);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to parse SeTaskDto: {ex.Message}\nRaw: {raw}");
+            return null;
+        }
     }
     #endregion
 

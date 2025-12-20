@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 
@@ -10,7 +10,7 @@ public class PracticeTaskManager : MonoBehaviour
     public GameObject taskItemPrefab; // prefab with TextMeshProUGUI fields
 
     public List<PracticeTask> tasks = new List<PracticeTask>();
-    private Dictionary<int, TextMeshProUGUI> taskStatusLabels = new Dictionary<int, TextMeshProUGUI>();
+    private Dictionary<string, TextMeshProUGUI> taskStatusLabels = new Dictionary<string, TextMeshProUGUI>();
 
     private SelectionManager selectionManager;
 
@@ -37,7 +37,7 @@ public class PracticeTaskManager : MonoBehaviour
                 // Check if another panel is already open
                 if (selectionManager != null && selectionManager.IsAnyPanelOpen())
                 {
-                    Debug.Log("Cannot open task panel � another panel is already open.");
+                    Debug.Log("Cannot open task panel — another panel is already open.");
                     return;
                 }
 
@@ -52,11 +52,11 @@ public class PracticeTaskManager : MonoBehaviour
     {
         tasks = new List<PracticeTask>
         {
-            new PracticeTask { taskId = 17, componentId=3, taskName = "Inspect Hook Block", taskDescription = "Press E on the Hook to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 18, componentId=1, taskName = "Inspect Boom", taskDescription = "Press E on the Boom to view its info.", isCompleted = false },
-            new PracticeTask { taskId = 19, componentId=5, taskName = "Inspect Out Trigger", taskDescription = "Press E on the Left Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 20, componentId=2, taskName = "Inspect Column", taskDescription = "Press E on the Right Trigger.", isCompleted = false },
-            new PracticeTask { taskId = 21, componentId=4, taskName = "Inspect Control Panel", taskDescription = "Press E on the Control Panel.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_01", componentCode="COMPONENT_03", taskName = "Xem thông tin Ròng rọc móc (Hook Block)", taskDescription = "Nhấn E vào móc cẩu để xem thông tin.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_02", componentCode="COMPONENT_01", taskName = "Xem thông tin Cần cẩu (Boom)", taskDescription = "Nhấn E vào cần cẩu để xem thông tin.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_03", componentCode="COMPONENT_05", taskName = "Xem thông tin Chân chống (Outrigger)", taskDescription = "Nhấn E vào chân chống.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_04", componentCode="COMPONENT_02", taskName = "Xem thông tin Trụ xoay (Column)", taskDescription = "Nhấn E vào trụ xoay để xem thông tin.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_05", componentCode="COMPONENT_04", taskName = "Xem thông tin Cabin điều khiển", taskDescription = "Nhấn E vào cabin điều khiển.", isCompleted = false },
         };
     }
 
@@ -74,20 +74,20 @@ public class PracticeTaskManager : MonoBehaviour
 
             // Expect prefab to have 2 TMP fields: [0] name, [1] status
             texts[0].text = $"{task.taskName}\n<size=80%><color=#555555>{task.taskDescription}</color></size>";
-            texts[1].text = task.isCompleted ? "<color=green>Done</color>" : "<color=red>Not Done</color>";
+            texts[1].text = task.isCompleted ? "<color=green>Hoàn thành</color>" : "<color=red>Chưa hoàn thành</color>";
 
-            taskStatusLabels[task.taskId] = texts[1];
+            taskStatusLabels[task.taskCode] = texts[1];
         }
     }
 
-    public void MarkTaskAsDone(int componentId)
+    public void MarkTaskAsDone(string componentCode)
     {
-        var task = tasks.Find(t => t.componentId == componentId);
+        var task = tasks.Find(t => t.componentCode == componentCode);
         if (task != null && !task.isCompleted)
         {
             task.isCompleted = true;
-            taskStatusLabels[task.taskId].text = "<color=green>Done</color>";
-            Debug.Log($"Task '{task.taskName}' marked as done.");
+            taskStatusLabels[task.taskCode].text = "<color=green>Hoàn thành</color>";
+            Debug.Log($"Nhiệm vụ '{task.taskName}' đã hoàn thành.");
         }
     }
 }

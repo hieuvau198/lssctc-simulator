@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CargoPositioningManager : MonoBehaviour
 {
@@ -13,14 +13,15 @@ public class CargoPositioningManager : MonoBehaviour
     public float groundY = 0f;
 
     [Header("Scoring")]
-    public int totalPoints = 100;
-    public int polePenalty = 5;
+    public float totalPoints = 10;
+    public float polePenalty = 0.5f;
 
     private bool isActive = false;
     private bool isFailed = false;
     private bool isCompleted = false;
     private float timer = 0f;
 
+    private int poleHitMistakes = 0;
     void Start()
     {
         StartPractice();
@@ -36,7 +37,7 @@ public class CargoPositioningManager : MonoBehaviour
         // --- Time limit ---
         if (timer > maxTime)
         {
-            FailPractice("Time limit exceeded!");
+            FailPractice("Vượt quá thời gian cho phép!");
             return;
         }
 
@@ -50,7 +51,7 @@ public class CargoPositioningManager : MonoBehaviour
 
             if (distFromTarget > targetRadius)
             {
-                FailPractice("Cargo dropped outside the target zone!");
+                FailPractice("Hàng rơi ngoài khu vực đặt!");
                 return;
             }
         }
@@ -76,13 +77,13 @@ public class CargoPositioningManager : MonoBehaviour
         isFailed = false;
         isCompleted = false;
         timer = 0f;
-        totalPoints = 100;
-
+        poleHitMistakes = 0;
         Debug.Log("Cargo Positioning Challenge started!");
     }
 
-    public void DeductPoints(int amount)
+    public void DeductPoints(float amount)
     {
+        poleHitMistakes++;
         totalPoints -= amount;
         if (totalPoints < 0) totalPoints = 0;
 
@@ -110,4 +111,5 @@ public class CargoPositioningManager : MonoBehaviour
     public bool IsFailed => isFailed;
     public bool IsActive => isActive;
     public float Timer => timer;
+    public int TotalMistakes => poleHitMistakes;
 }
