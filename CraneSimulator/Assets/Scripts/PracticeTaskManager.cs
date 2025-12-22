@@ -52,9 +52,9 @@ public class PracticeTaskManager : MonoBehaviour
     {
         tasks = new List<PracticeTask>
         {
-            new PracticeTask { taskCode = "TASK_01", componentCode="COMPONENT_03", taskName = "Xem thông tin Ròng rọc móc (Hook Block)", taskDescription = "Nhấn E vào móc cẩu để xem thông tin.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_01", componentCode="COMPONENT_03", taskName = "Xem thông tin Móc cẩu (Hook Block)", taskDescription = "Nhấn E vào móc cẩu để xem thông tin.", isCompleted = false },
             new PracticeTask { taskCode = "TASK_02", componentCode="COMPONENT_01", taskName = "Xem thông tin Cần cẩu (Boom)", taskDescription = "Nhấn E vào cần cẩu để xem thông tin.", isCompleted = false },
-            new PracticeTask { taskCode = "TASK_03", componentCode="COMPONENT_05", taskName = "Xem thông tin Chân chống (Outrigger)", taskDescription = "Nhấn E vào chân chống.", isCompleted = false },
+            new PracticeTask { taskCode = "TASK_03", componentCode="COMPONENT_05", taskName = "Xem thông tin Chân trụ (Outrigger)", taskDescription = "Nhấn E vào chân chống.", isCompleted = false },
             new PracticeTask { taskCode = "TASK_04", componentCode="COMPONENT_02", taskName = "Xem thông tin Trụ xoay (Column)", taskDescription = "Nhấn E vào trụ xoay để xem thông tin.", isCompleted = false },
             new PracticeTask { taskCode = "TASK_05", componentCode="COMPONENT_04", taskName = "Xem thông tin Cabin điều khiển", taskDescription = "Nhấn E vào cabin điều khiển.", isCompleted = false },
         };

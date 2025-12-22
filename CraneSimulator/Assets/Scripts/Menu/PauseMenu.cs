@@ -237,16 +237,19 @@ public class PauseMenu : MonoBehaviour
 
         if (practiceTaskManager != null)
         {
+            float totalSum = 0f;
             foreach (var task in practiceTaskManager.tasks)
             {
+                float taskPotentialScore = 2f;
                 bool taskPassed = task.isCompleted;
-                int score = taskPassed ? 100 : 0;
+                float finalTaskScore = taskPassed ? taskPotentialScore : 0f;
+                totalSum += finalTaskScore;
 
                 // Add to standard practice list
                 practiceTasks.Add(new PracticeAttemptTaskDto
                 {
                     taskCode = task.taskCode,
-                    score = score,
+                    score = (int)finalTaskScore,
                     isPass = taskPassed
                 });
 
@@ -255,39 +258,60 @@ public class PauseMenu : MonoBehaviour
                 {
                     taskCode = task.taskCode,
                     isPass = taskPassed,
-                    durationSecond = 0 // You can calculate duration per task if your manager tracks it
+                    durationSecond = 0 
                 });
             }
+            calculatedScore = totalSum;
             if (practiceTasks.Count > 0)
             {
-                calculatedScore = practiceTasks.Sum(t => t.score) / (float)practiceTasks.Count;
+                //calculatedScore = practiceTasks.Sum(t => t.score) / (float)practiceTasks.Count;
                 isPassed = practiceTasks.All(t => t.isPass);
             }
         }
         else if (zigzagPracticeManager != null)
         {
-            // Single task logic
-            calculatedScore = zigzagPracticeManager.totalPoints ;
-            isPassed = zigzagPracticeManager.IsCompleted && !zigzagPracticeManager.IsFailed;
+            // Task 1: Zigzag Phase
+            bool zigzagPass = zigzagPracticeManager.CurrentPhase > ZigzagPracticeManager.PracticePhase.Zigzag
+                              || zigzagPracticeManager.IsCompleted;
 
-            string code = "TASK_06"; // Make sure this matches your DB
-
-            mistake = zigzagPracticeManager.TotalMistakes;
             practiceTasks.Add(new PracticeAttemptTaskDto
             {
-                taskCode = code,
-                score = Mathf.RoundToInt(calculatedScore),
-                isPass = isPassed,
-                mistakes = zigzagPracticeManager.TotalMistakes
+                taskCode = "TASK_06", // Code for Phase 1
+                score = zigzagPass ? 5 : 0, // Split total points (e.g., 5 points each)
+                isPass = zigzagPass,
+                mistakes = zigzagPracticeManager.GetZigzagMistakes()
             });
 
-            examTasks.Add(new SubmitSeTaskDto
+            // Task 2: Second Truck Phase
+            bool truckPass = zigzagPracticeManager.IsCompleted;
+
+            practiceTasks.Add(new PracticeAttemptTaskDto
             {
-                taskCode = code,
-                isPass = isPassed,
-                durationSecond = (int)Time.timeSinceLevelLoad // Example duration 
+                taskCode = "TASK_08", // Code for Phase 2
+                score = truckPass ? 5 : 0,
+                isPass = truckPass,
+                mistakes = zigzagPracticeManager.GetTruckMistakes()
             });
+
+            // Handle Exam DTOs similarly
+            examTasks.Add(new SubmitSeTaskDto 
+            { 
+                taskCode = "TASK_06", 
+                isPass = zigzagPass, 
+                durationSecond = 0 ,
+                mistake = zigzagPracticeManager.GetZigzagMistakes()
+            });
+            examTasks.Add(new SubmitSeTaskDto { 
+                taskCode = "TASK_08", 
+                isPass = truckPass, 
+                durationSecond = (int)Time.timeSinceLevelLoad ,
+                mistake = zigzagPracticeManager.GetTruckMistakes()
+            });
+
+            calculatedScore = practiceTasks.Sum(t => t.score);
+            isPassed = zigzagPracticeManager.IsCompleted && !zigzagPracticeManager.IsFailed;
         }
+        
         else if (cargoPositioningManager != null)
         {
             calculatedScore = cargoPositioningManager.totalPoints;
@@ -307,7 +331,8 @@ public class PauseMenu : MonoBehaviour
             {
                 taskCode = code,
                 isPass = isPassed,
-                durationSecond = (int)Time.timeSinceLevelLoad
+                durationSecond = (int)Time.timeSinceLevelLoad,
+                mistake = cargoPositioningManager.TotalMistakes
             });
         }
         else
@@ -336,13 +361,15 @@ public class PauseMenu : MonoBehaviour
                 tasks = examTasks 
             };
 
+            LogFinalExamRequest(partialId, dto);
             // Call the updated API which returns FinalExamPartial (containing task results)
             var finalRes = await ApiService.Instance.SubmitFinalExamSeAsync(partialId, dto);
 
             if (finalRes == null)
             {
                 Debug.LogError("Final exam submit failed.");
-                return;
+                ReturnToPracticeList();
+                //return;
             }
 
             Debug.Log("Final exam submitted. Partial ID=" + finalRes.id);
@@ -376,6 +403,7 @@ public class PauseMenu : MonoBehaviour
             else
             {
                 Debug.LogError("Failed to complete attempt.");
+                ReturnToPracticeList();
             }
         }
     }
@@ -397,8 +425,6 @@ public class PauseMenu : MonoBehaviour
                 return;
 
             DateTimeOffset endTime = GetVietnamNow();
-
-            
             List<PracticeAttemptTaskDto> practiceTasks = new();
             List<SubmitSeTaskDto> examTasks = new();
 
@@ -410,40 +436,45 @@ public class PauseMenu : MonoBehaviour
                     practiceTasks.Add(new PracticeAttemptTaskDto
                     {
                         taskCode = task.taskCode,
-                        score = 0,
-                        isPass = false,
+                        score = task.isCompleted ? 2: 0,
+                        isPass =task.isCompleted,
                         mistakes = 0
                     });
 
                     examTasks.Add(new SubmitSeTaskDto
                     {
                         taskCode = task.taskCode,
-                        isPass = false,
+                        isPass = task.isCompleted,
                         durationSecond = 0
                     });
                 }
             }
-            
             else if (zigzagPracticeManager != null)
             {
-                string code = "TASK_06";
+                // Record what was finished and what was missed
+                bool zigzagDone = zigzagPracticeManager.CurrentPhase > ZigzagPracticeManager.PracticePhase.Zigzag;
 
                 practiceTasks.Add(new PracticeAttemptTaskDto
                 {
-                    taskCode = code,
-                    score = 0,
-                    isPass = false,
-                    mistakes = zigzagPracticeManager.TotalMistakes
+                    taskCode = "TASK_06",
+                    score = zigzagDone ? 5 : 0,
+                    isPass = zigzagDone,
+                    mistakes = zigzagPracticeManager.GetZigzagMistakes()
                 });
 
-                examTasks.Add(new SubmitSeTaskDto
+                practiceTasks.Add(new PracticeAttemptTaskDto
                 {
-                    taskCode = code,
+                    taskCode = "TASK_08",
+                    score = 0, // Forced fail on quit
                     isPass = false,
-                    durationSecond = (int)Time.timeSinceLevelLoad
+                    mistakes = zigzagPracticeManager.GetTruckMistakes()
                 });
+
+                // Add to examTasks list as well
+                examTasks.Add(new SubmitSeTaskDto { taskCode = "TASK_06", isPass = zigzagDone, durationSecond = 0, mistake = zigzagPracticeManager.GetZigzagMistakes() });
+                examTasks.Add(new SubmitSeTaskDto { taskCode = "TASK_08", isPass = false, durationSecond = 0, mistake = zigzagPracticeManager.GetTruckMistakes() });
             }
-            
+
             else if (cargoPositioningManager != null)
             {
                 string code = "TASK_07";
@@ -452,20 +483,21 @@ public class PauseMenu : MonoBehaviour
                 {
                     taskCode = code,
                     score = 0,
-                    isPass = false,
+                    isPass = cargoPositioningManager.IsCompleted,
                     mistakes = cargoPositioningManager.TotalMistakes
                 });
 
                 examTasks.Add(new SubmitSeTaskDto
                 {
                     taskCode = code,
-                    isPass = false,
-                    durationSecond = (int)Time.timeSinceLevelLoad
+                    isPass = cargoPositioningManager.IsCompleted,
+                    durationSecond = (int)Time.timeSinceLevelLoad,
+                    mistake = cargoPositioningManager.TotalMistakes
                 });
             }
             else
             {
-                Debug.LogWarning("❌ Không tìm thấy Practice Manager để submit fail.");
+                Debug.LogWarning("Không tìm thấy Practice Manager để submit fail.");
                 return;
             }
 
@@ -521,8 +553,8 @@ public class PauseMenu : MonoBehaviour
         optionsMenuUI.SetActive(false);
         resultPanel.SetActive(true);
 
-        scoreText.text = "Score: " + result.score;
-        statusText.text = result.isPass ? "Result: <color=green>Pass</color>" : "Result: <color=red>Fail</color>";
+        scoreText.text = "Điểm: " + result.score;
+        statusText.text = result.isPass ? "Kết quả: <color=green>Pass</color>" : "Kết quả: <color=red>Fail</color>";
 
         // Clear old items
         foreach (Transform child in taskListParent)
@@ -533,7 +565,7 @@ public class PauseMenu : MonoBehaviour
         {
             GameObject item = Instantiate(taskResultPrefab, taskListParent);
 
-            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.description;
+            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.taskName;
             item.transform.Find("TaskScore").GetComponent<TextMeshProUGUI>().text = "Score: " + task.score;
             item.transform.Find("TaskStatus").GetComponent<TextMeshProUGUI>().text =
                 task.isPass ? "Pass" : "Fail";
@@ -598,4 +630,24 @@ public class PauseMenu : MonoBehaviour
     {
         return DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7));
     }
+    private void ReturnToPracticeList()
+    {
+        Time.timeScale = 1f; // Ensure time is moving before loading
+        SceneManager.LoadScene("PracticeListScene");
+    }
+
+    //test
+    private void LogFinalExamRequest(int partialId, SubmitSeFinalDto dto)
+    {
+        try
+        {
+            string json = JsonUtility.ToJson(dto, true);
+            Debug.Log($"[FINAL EXAM REQUEST]\nPartialId: {partialId}\nBody:\n{json}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Failed to log final exam request: " + ex.Message);
+        }
+    }
+
 }

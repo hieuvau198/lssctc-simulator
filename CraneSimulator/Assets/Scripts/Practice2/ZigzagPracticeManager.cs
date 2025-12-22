@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
+using System.Linq;
 
 public class ZigzagPracticeManager : MonoBehaviour
 {
     public enum PracticePhase
     {
-        Zigzag,
-        MoveToSecondTruck,
-        Completed
+        Zigzag = 0,
+        MoveToSecondTruck = 1,
+        Completed = 2
     }
     [Header("UI")]
     public TextMeshProUGUI phaseStatusText;
@@ -27,6 +28,8 @@ public class ZigzagPracticeManager : MonoBehaviour
     [Header("Scoring")]
     public float totalPoints = 10;
     public float polePenalty = 0.5f;
+
+    private int[] mistakesPerPhase = new int[2];
 
     private int currentWaypoint = 0;
     private float timer = 0f;
@@ -54,19 +57,6 @@ public class ZigzagPracticeManager : MonoBehaviour
             FailPractice("Vượt quá thời gian cho phép!");
             return;
         }
-
-        //// --- Reaching next waypoint ---
-        //float dist = Vector3.Distance(load.position, waypoints[currentWaypoint].position);
-        //if (dist < waypointRadius)
-        //{
-        //    Debug.Log($"Waypoint {currentWaypoint + 1} reached!");
-        //    currentWaypoint++;
-        //    if (currentWaypoint >= waypoints.Count)
-        //    {
-        //        SuccessPractice();
-        //        return;
-        //    }
-        //}
 
         // --- Cargo touches ground ---
         if (load.position.y <= groundY + 0.1f) // small offset for collider bottom
@@ -107,11 +97,15 @@ public class ZigzagPracticeManager : MonoBehaviour
         float dist = Vector3.Distance(load.position, secondTruckTarget.position);
         if (dist < truckTargetRadius)
         {
+            currentPhase = PracticePhase.Completed;
             SuccessPractice();
         }
     }
     public void StartPractice()
     {
+        mistakesPerPhase[0] = 0;
+        mistakesPerPhase[1] = 0;
+
         poleHitMistakes = 0;
         isActive = true;
         isFailed = false;
@@ -122,17 +116,30 @@ public class ZigzagPracticeManager : MonoBehaviour
         UpdatePhaseText();
         Debug.Log("Zigzag practice started!");
     }
-
     public void DeductPoints(float amount)
     {
-        poleHitMistakes++;
-        totalPoints -= amount;
-        Debug.Log($"Hit pole! -{amount} points. Current Score: {totalPoints}");
-        if (totalPoints < 0)
+        int phaseIndex = (int)currentPhase;
+        if (phaseIndex < mistakesPerPhase.Length)
         {
-            totalPoints = 0;
+            mistakesPerPhase[phaseIndex]++;
         }
+
+        totalPoints -= amount;
+        if (totalPoints < 0) totalPoints = 0;
+
+        Debug.Log($"Hit pole in {currentPhase}! Mistake added to phase {phaseIndex}. Current Score: {totalPoints}");
     }
+    //public void DeductPoints(float amount)
+    //{
+
+    //    poleHitMistakes++;
+    //    totalPoints -= amount;
+    //    Debug.Log($"Hit pole! -{amount} points. Current Score: {totalPoints}");
+    //    if (totalPoints < 0)
+    //    {
+    //        totalPoints = 0;
+    //    }
+    //}
 
     public void FailPractice(string reason)
     {
@@ -183,5 +190,7 @@ public class ZigzagPracticeManager : MonoBehaviour
     public bool IsFailed => isFailed;
     public bool IsActive => isActive;
     public PracticePhase CurrentPhase => currentPhase;
-    public int TotalMistakes => poleHitMistakes;
+    public int GetZigzagMistakes() => mistakesPerPhase[0];
+    public int GetTruckMistakes() => mistakesPerPhase[1];
+    public int TotalMistakes => mistakesPerPhase.Sum();
 }

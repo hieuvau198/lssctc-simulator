@@ -4887,10 +4887,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MobileCrane (1)
       objectReference: {fileID: 0}
-    - target: {fileID: 3170066833123825940, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5411629417245423338, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.71
@@ -4931,29 +4927,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6455272805492239936, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_Name
-      value: Operators_Cabin
-      objectReference: {fileID: 0}
-    - target: {fileID: 8841099481569541252, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_Positions.Array.data[0].x
-      value: 7.9884467
-      objectReference: {fileID: 0}
-    - target: {fileID: 8841099481569541252, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_Positions.Array.data[0].z
-      value: 8.967537
-      objectReference: {fileID: 0}
-    - target: {fileID: 8841099481569541252, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_Positions.Array.data[1].x
-      value: 7.98886
-      objectReference: {fileID: 0}
-    - target: {fileID: 8841099481569541252, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
-      propertyPath: m_Positions.Array.data[1].z
-      value: 3.7506666
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 6507469521532933127, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}

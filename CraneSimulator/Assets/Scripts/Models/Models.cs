@@ -146,6 +146,7 @@ public class PracticeAttemptTaskResponse
     public int practiceAttemptId;
     public int taskId;
     public string taskCode;
+    public string taskName;
     public int score;
     public string description;
     public bool isPass;
@@ -158,6 +159,7 @@ public class SubmitSeTaskDto
     public string taskCode;
     public bool isPass;
     public int durationSecond;
+    public int mistake;
 }
 
 [Serializable]
