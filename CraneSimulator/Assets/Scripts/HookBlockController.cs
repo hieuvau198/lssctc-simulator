@@ -21,8 +21,7 @@ public class HookBlockController : MonoBehaviour
     public float jointSpring = 50f;           // Rope stiffness
     public float jointDamper = 5f;            // Rope damping
 
-    [Header("Audio")]
-    public AudioSource moveAudio;
+    
 
     private ConfigurableJoint ropeJoint;
     private float currentLength;
@@ -47,7 +46,7 @@ public class HookBlockController : MonoBehaviour
 
         if (ropeRenderer == null)
         {
-            Debug.LogWarning("No LineRenderer assigned — rope will be invisible.");
+            Debug.LogWarning("No LineRenderer assigned rope will be invisible.");
         }
         else
         {
@@ -81,7 +80,7 @@ public class HookBlockController : MonoBehaviour
         HandleInput();
         UpdateRopeLength();
         UpdateRopeVisual();
-        HandleMovementSound(IsRopeMoving());
+        
     }
 
     private void HandleInput()
@@ -117,17 +116,5 @@ public class HookBlockController : MonoBehaviour
         return Input.GetKey(dropKey) || Input.GetKey(retractKey);
     }
 
-    private void HandleMovementSound(bool isMoving)
-    {
-        if (isMoving)
-        {
-            if (!moveAudio.isPlaying)
-                moveAudio.Play();
-        }
-        else
-        {
-            if (moveAudio.isPlaying)
-                moveAudio.Stop();
-        }
-    }
+    
 }

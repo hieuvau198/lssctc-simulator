@@ -27,8 +27,7 @@ public class BoomForward : MonoBehaviour
     public float extendSpeed = 2f;
     private bool boomFor_Bool = true;
 
-    [Header("Audio")]
-    public AudioSource moveAudio;
+    
 
 
     void Start()
@@ -64,7 +63,7 @@ public class BoomForward : MonoBehaviour
             BoomMoveForward();
             isMoving = true;
         }
-        HandleMovementSound(isMoving);
+        
     }
     private void BoomMoveForward()
     {
@@ -88,19 +87,7 @@ public class BoomForward : MonoBehaviour
             }
         }
     }
-    private void HandleMovementSound(bool isMoving)
-    {
-        if (isMoving)
-        {
-            if (!moveAudio.isPlaying)
-                moveAudio.Play();
-        }
-        else
-        {
-            if (moveAudio.isPlaying)
-                moveAudio.Stop();
-        }
-    }
+    
     //private void UpdateRope()
     //{
     //    if (mainRopeStart == null || mainRopeEnd == null) return;

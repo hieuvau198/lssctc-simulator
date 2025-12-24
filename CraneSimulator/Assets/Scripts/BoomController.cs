@@ -18,8 +18,7 @@ public class BoomController : MonoBehaviour
     private Transform _piston_A;
     private Transform _piston_B;
 
-    [Header("Audio")]
-    public AudioSource moveAudio;
+   
 
     private float floatBoom = 0f;
     private float pistonOffset = 0f;
@@ -62,7 +61,7 @@ public class BoomController : MonoBehaviour
         // Smoothly rotate the boom around X axis (for up/down)
         Quaternion targetRotation = Quaternion.Euler(floatBoom, 0f, 0f);
         boom_1.localRotation = Quaternion.Lerp(boom_1.localRotation, targetRotation, Time.deltaTime / smoothBoomUp);
-        HandleMovementSound(isMoving);
+        
 
     }
     private void LateUpdate()
@@ -78,17 +77,5 @@ public class BoomController : MonoBehaviour
     {
         return Input.GetKey(upBoom) || Input.GetKey(downBoom);
     }
-    private void HandleMovementSound(bool isMoving)
-    {
-        if (isMoving)
-        {
-            if (!moveAudio.isPlaying)
-                moveAudio.Play();
-        }
-        else
-        {
-            if (moveAudio.isPlaying)
-                moveAudio.Stop();
-        }
-    }
+    
 }

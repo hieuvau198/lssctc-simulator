@@ -9,8 +9,7 @@ public class RotationColumn : MonoBehaviour
     public float speedColumn = 0f;
     public float smoothRotationColumn = 1.2f;
 
-    [Header("Audio")]
-    public AudioSource moveAudio;
+    
 
     private float floatRotColumn = 0;
     //private bool rotationColumn_Bool = true;
@@ -37,20 +36,8 @@ public class RotationColumn : MonoBehaviour
         Quaternion targetRotation = Quaternion.AngleAxis(floatRotColumn, Vector3.forward);
         columnCrane.localRotation = Quaternion.Lerp(columnCrane.localRotation, targetRotation, Time.deltaTime * speedColumn / smoothRotationColumn);
 
-        HandleMovementSound(isMoving);
+        
     }
-    private void HandleMovementSound(bool isMoving)
-    {
-        if (isMoving)
-        {
-            if (!moveAudio.isPlaying)
-                moveAudio.Play();
-        }
-        else
-        {
-            if (moveAudio.isPlaying)
-                moveAudio.Stop();
-        }
-    }
+    
 
 }

@@ -15,8 +15,7 @@ public class OutTriggerLeft : MonoBehaviour
     public KeyCode extendKey = KeyCode.UpArrow;
     public KeyCode retractKey = KeyCode.DownArrow;
 
-    [Header("Audio")]
-    public AudioSource moveAudio;
+    
 
     private Vector3 armStartPos;
     private Vector3 legStartPos;
@@ -51,7 +50,7 @@ public class OutTriggerLeft : MonoBehaviour
             isMoving = true;
         }
 
-        HandleMovementSound(isMoving);
+        
     }
 
     private void ExtendManual()
@@ -99,17 +98,5 @@ public class OutTriggerLeft : MonoBehaviour
             );
         }
     }
-    private void HandleMovementSound(bool isMoving)
-    {
-        if (isMoving)
-        {
-            if (!moveAudio.isPlaying)
-                moveAudio.Play();
-        }
-        else
-        {
-            if (moveAudio.isPlaying)
-                moveAudio.Stop();
-        }
-    }
+    
 }
