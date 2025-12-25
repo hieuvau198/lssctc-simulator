@@ -317,7 +317,10 @@ public class PauseMenu : MonoBehaviour
             calculatedScore = cargoPositioningManager.totalPoints;
             isPassed = cargoPositioningManager.IsCompleted && !cargoPositioningManager.IsFailed;
 
-            string code = "TASK_07";
+            string code = practiceCode == "PRACTICE_11"
+                ? "TASK_09"
+                : "TASK_07";
+            //string code = "TASK_07";
             mistake = cargoPositioningManager.TotalMistakes;
             practiceTasks.Add(new PracticeAttemptTaskDto 
             { 
@@ -477,7 +480,11 @@ public class PauseMenu : MonoBehaviour
 
             else if (cargoPositioningManager != null)
             {
-                string code = "TASK_07";
+                string code = practiceCode == "PRACTICE_11"
+                    ? "TASK_09"
+                    : "TASK_07";
+
+                //string code = "TASK_07";
 
                 practiceTasks.Add(new PracticeAttemptTaskDto
                 {
@@ -554,7 +561,7 @@ public class PauseMenu : MonoBehaviour
         resultPanel.SetActive(true);
 
         scoreText.text = "Điểm: " + result.score;
-        statusText.text = result.isPass ? "Kết quả: <color=green>Pass</color>" : "Kết quả: <color=red>Fail</color>";
+        statusText.text = result.isPass ? "Kết quả: <color=green>Đạt</color>" : "Kết quả: <color=red>Trượt</color>";
 
         // Clear old items
         foreach (Transform child in taskListParent)
@@ -566,7 +573,7 @@ public class PauseMenu : MonoBehaviour
             GameObject item = Instantiate(taskResultPrefab, taskListParent);
 
             item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = task.taskName;
-            item.transform.Find("TaskScore").GetComponent<TextMeshProUGUI>().text = "Score: " + task.score;
+            item.transform.Find("TaskScore").GetComponent<TextMeshProUGUI>().text = "Điểm: " + task.score;
             item.transform.Find("TaskStatus").GetComponent<TextMeshProUGUI>().text =
                 task.isPass ? "Pass" : "Fail";
         }
@@ -583,8 +590,8 @@ public class PauseMenu : MonoBehaviour
         resultPanel.SetActive(true);
 
         // Display Overall Exam Results
-        scoreText.text = $"Total Marks: {res.marks:F2} / 10"; // Assuming 10 is max
-        statusText.text = res.isPass ? "Result: <color=green>Pass</color>" : "Result: <color=red>Fail</color>";
+        scoreText.text = $"Điểm: {res.marks:F2} / 10"; // Assuming 10 is max
+        statusText.text = res.isPass ? "Kết quả: <color=green>Đạt</color>" : "Result: <color=red>Trượt</color>";
 
         foreach (Transform child in taskListParent)
             Destroy(child.gameObject);
@@ -611,14 +618,14 @@ public class PauseMenu : MonoBehaviour
 
                 // Display Pass/Fail status
                 if (statusLabel != null)
-                    statusLabel.text = task.isPass ? "<color=green>Pass</color>" : "<color=red>Fail</color>";
+                    statusLabel.text = task.isPass ? "<color=green>Đạt</color>" : "<color=red>Trượt</color>";
             }
         }
         else
         {
             // Fallback if no tasks returned (just show main exam info)
             GameObject item = Instantiate(taskResultPrefab, taskListParent);
-            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = "Final Exam";
+            item.transform.Find("TaskName").GetComponent<TextMeshProUGUI>().text = "Kiểm tra cuối khóa";
             item.transform.Find("TaskStatus").GetComponent<TextMeshProUGUI>().text = res.status;
         }
 

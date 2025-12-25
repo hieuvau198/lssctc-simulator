@@ -74,7 +74,17 @@ public class PracticeListManager : MonoBehaviour
                 estimatedDurationMinutes = 8,
                 difficultyLevel = "Cơ bản",
                 sceneName = "Practice3"
+            },
+            new PracticeItem {
+                partialId = 0,
+                practiceCode = "PRACTICE_11",
+                practiceName = "Đặt hàng nâng cao",
+                practiceDescription = "Thực hành đặt hàng nâng cao với độ chính xác cao hơn.",
+                estimatedDurationMinutes = 12,
+                difficultyLevel = "Nâng cao",
+                sceneName = "Practice4" // ← scene dùng CargoPositioningManager
             }
+
     };
 
     private async void Start()
@@ -131,10 +141,6 @@ public class PracticeListManager : MonoBehaviour
         errorText.color = Color.white;
         errorText.text = $"Đang tải bài thực hành cho: {selectedClass.name}";
 
-
-        
-        
-
         // Branch by mode
         List<PracticeItem> uiPractices = new List<PracticeItem>();
         if (!isFinalExam)
@@ -152,17 +158,16 @@ public class PracticeListManager : MonoBehaviour
                 ClearPracticeCards();
                 return;
             }
-
-            //uiPractices = localPractices
-            //    .Where(lp => apiPractices.Any(api => api.practiceCode == lp.practiceCode))
-            //    .ToList();
-
             uiPractices = localPractices
                         .Where(lp => apiPractices.Any(api => api.practiceCode == lp.practiceCode))
                         .Select(lp =>
                         {
                             var match = apiPractices.First(api => api.practiceCode == lp.practiceCode);
                             lp.activityRecordId = match.activityRecordId; 
+                            lp.practiceDescription = match.practiceDescription;
+                            lp.estimatedDurationMinutes = match.estimatedDurationMinutes;
+                            lp.difficultyLevel = match.difficultyLevel;
+                            lp.practiceName = match.practiceName;
                             return lp;
                         })
                         .ToList();
@@ -189,7 +194,11 @@ public class PracticeListManager : MonoBehaviour
             {
                 var match = examPractices.FirstOrDefault(api => api.practiceCode == lp.practiceCode);
                 if (match != null)
-                    lp.partialId = match.finalExamPartialId;  
+                    lp.partialId = match.finalExamPartialId;
+                    lp.practiceDescription = match.practiceDescription;
+                    lp.estimatedDurationMinutes = match.estimatedDurationMinutes;
+                    lp.difficultyLevel = match.difficultyLevel;
+                    lp.practiceName = match.practiceName;
             }
         }
         // Display
@@ -264,7 +273,7 @@ public class PracticeListManager : MonoBehaviour
         
         if (selectedPracticePartialId == 0)
         {
-            errorText.color = Color.red;
+            errorText.color = Color.white;
             errorText.text = "System error: partialId missing.";
             return;
         }
@@ -283,7 +292,7 @@ public class PracticeListManager : MonoBehaviour
         // CASE 1: invalid code → ErrorMessageDto
         if (apiResponse is ErrorMessageDto err)
         {
-            errorText.color = Color.red;
+            errorText.color = Color.white;
             errorText.text = err.message;
             codePopup.SetActive(false);
             return;

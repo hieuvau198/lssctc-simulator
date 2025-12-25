@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81611f17cf9608f45ab5acc5d8e9bf9b, type: 3}
   m_Name: CargoPositioningTarget
   m_EditorClassIdentifier: 
-  title: 
-  description: 
-  image: {fileID: 0}
+  title: "Nhi\u1EC7m v\u1EE5"
+  description: "Di chuy\u1EC3n th\xF9ng h\xE0ng d\u1EBFn v\u1ECB tr\xED ch\u1EC9
+    \u0111\u1ECBnh"
+  image: {fileID: 21300000, guid: e74f4f60965280e42bdaec9e4df396f5, type: 3}
