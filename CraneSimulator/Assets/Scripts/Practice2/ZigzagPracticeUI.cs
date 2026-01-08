@@ -24,7 +24,7 @@ public class ZigzagPracticeUI : MonoBehaviour
 
         objectivesText.text =
             "- Đi qua tất cả các điểm theo đúng thứ tự.\n" +
-            "- Tránh va vào cột (-5 điểm mỗi lần).\n" +
+            "- Tránh va vào cột (-0.5 điểm mỗi lần).\n" +
             "- Giữ hàng cách mặt đất (không để chạm xuống).";
     }
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 
 public class CargoPositioningUI : MonoBehaviour
@@ -17,15 +17,15 @@ public class CargoPositioningUI : MonoBehaviour
     {
         if (panel) panel.SetActive(false);
 
-        titleText.text = "Cargo Positioning Challenge";
+        titleText.text = "Thử thách đặt hàng hóa";
         descriptionText.text =
-            "Move the cargo and place it precisely inside the designated target circle on the ground.";
+            "Di chuyển hàng hóa và đặt chính xác vào vòng tròn mục tiêu trên mặt đất.";
 
         objectivesText.text =
-            "- Lower cargo into the target circle.\n" +
-            "- Avoid poles (-5 pts each).\n" +
-            "- Do not drop cargo outside the circle.\n" +
-            "- Complete before time runs out.";
+           "- Hạ hàng hóa vào đúng vòng tròn mục tiêu.\n" +
+            "- Tránh va chạm cột (-0.5 điểm mỗi lần).\n" +
+            "- Không được thả hàng ra ngoài vòng tròn.\n" +
+            "- Hoàn thành trước khi hết thời gian.";
     }
 
     void Update()

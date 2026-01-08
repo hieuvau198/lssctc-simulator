@@ -15,14 +15,15 @@ public class ZigzagPracticeManager : MonoBehaviour
     public TextMeshProUGUI phaseStatusText;
     [Header("References")]
     public Transform load; // your cargo object
+    public Collider loadCollider;
     public Transform hook; // optional - for swing check
-    public List<Transform> waypoints;
-    public Transform secondTruckTarget;
+    public List<BoxCollider> waypoints;
+    public BoxCollider secondTruckTarget;
     [Header("Practice Settings")]
     public float waypointRadius = 4f;
     public float truckTargetRadius = 1f;
     public float maxSwingAngle = 15f;
-    public float maxTime = 120f;
+    public float maxTime = 300f;
     public float groundY = 0f; // the Y height of the ground plane
 
     [Header("Scoring")]
@@ -30,7 +31,8 @@ public class ZigzagPracticeManager : MonoBehaviour
     public float polePenalty = 0.5f;
 
     private int[] mistakesPerPhase = new int[2];
-
+    private float phaseStartTime;
+    private float[] phaseDurations = new float[2];
     private int currentWaypoint = 0;
     private float timer = 0f;
     private bool isActive = false;
@@ -74,18 +76,40 @@ public class ZigzagPracticeManager : MonoBehaviour
                 break;
         }
     }
+    //private void HandleZigzagPhase()
+    //{
+    //    float dist = Vector3.Distance(load.position, waypoints[currentWaypoint].position);
+    //    if (dist < waypointRadius)
+    //    {
+    //        Debug.Log($"Waypoint {currentWaypoint + 1} reached!");
+    //        currentWaypoint++;
+
+    //        if (currentWaypoint >= waypoints.Count)
+    //        {
+    //            phaseDurations[0] =
+    //            Time.timeSinceLevelLoad - phaseStartTime;
+    //            currentPhase = PracticePhase.MoveToSecondTruck;
+    //            phaseStartTime = Time.timeSinceLevelLoad;
+    //            UpdatePhaseText();
+    //        }
+    //    }
+    //}
     private void HandleZigzagPhase()
     {
-        float dist = Vector3.Distance(load.position, waypoints[currentWaypoint].position);
-        if (dist < waypointRadius)
+        if (currentWaypoint >= waypoints.Count)
+            return;
+
+        if (IsOverlappingBox(waypoints[currentWaypoint]))
         {
             Debug.Log($"Waypoint {currentWaypoint + 1} reached!");
+
             currentWaypoint++;
 
             if (currentWaypoint >= waypoints.Count)
             {
-                Debug.Log("Zigzag completed! Move cargo to the second truck.");
+                phaseDurations[0] = Time.timeSinceLevelLoad - phaseStartTime;
                 currentPhase = PracticePhase.MoveToSecondTruck;
+                phaseStartTime = Time.timeSinceLevelLoad;
                 UpdatePhaseText();
             }
         }
@@ -94,13 +118,49 @@ public class ZigzagPracticeManager : MonoBehaviour
     // ================= PHASE 2 =================
     private void HandleSecondTruckPhase()
     {
-        float dist = Vector3.Distance(load.position, secondTruckTarget.position);
-        if (dist < truckTargetRadius)
+        //float dist = Vector3.Distance(load.position, secondTruckTarget.position);
+        //if (dist < truckTargetRadius)
+        //{
+        //    phaseDurations[1] =
+        //    Time.timeSinceLevelLoad - phaseStartTime;
+        //    currentPhase = PracticePhase.Completed;
+        //    SuccessPractice();
+        //}
+        if (IsOverlappingBox(secondTruckTarget))
         {
+            phaseDurations[1] = Time.timeSinceLevelLoad - phaseStartTime;
             currentPhase = PracticePhase.Completed;
             SuccessPractice();
         }
     }
+    private bool IsOverlappingBox(BoxCollider targetBox)
+    {
+        if (targetBox == null || loadCollider == null)
+            return false;
+
+        // 1 << 8 represents Layer 8 (Cargo)
+        int cargoLayerMask = 1 << 8;
+
+        // Calculate the world-space center and half-extents
+        Vector3 center = targetBox.transform.TransformPoint(targetBox.center);
+        Vector3 halfExtents = Vector3.Scale(targetBox.size, targetBox.transform.lossyScale) * 0.5f;
+        Quaternion orientation = targetBox.transform.rotation;
+
+        // Perform the check
+        Collider[] hitColliders = Physics.OverlapBox(center, halfExtents, orientation, cargoLayerMask);
+
+        foreach (var hit in hitColliders)
+        {
+            // Check if the hit object is our specific load
+            if (hit == loadCollider || hit.transform == load)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void StartPractice()
     {
         mistakesPerPhase[0] = 0;
@@ -113,8 +173,8 @@ public class ZigzagPracticeManager : MonoBehaviour
         currentWaypoint = 0;
         timer = 0f;
         currentPhase = PracticePhase.Zigzag;
+        phaseStartTime = Time.timeSinceLevelLoad;
         UpdatePhaseText();
-        Debug.Log("Zigzag practice started!");
     }
     public void DeductPoints(float amount)
     {
@@ -144,10 +204,10 @@ public class ZigzagPracticeManager : MonoBehaviour
     public void FailPractice(string reason)
     {
         if (isFailed) return;
+
         isFailed = true;
         isActive = false;
         UpdatePhaseText($"<color=red>THẤT BẠI:</color> {reason}");
-        Debug.Log($"Practice failed: {reason} | Final Score: {totalPoints}");
     }
 
     public void SuccessPractice()
@@ -156,7 +216,6 @@ public class ZigzagPracticeManager : MonoBehaviour
         isActive = false;
         isCompleted = true;
         UpdatePhaseText();
-        Debug.Log($"Practice completed successfully in {timer:F1}s! Final Score: {totalPoints}");
     }
     private void UpdatePhaseText(string customMessage = "")
     {
@@ -186,11 +245,15 @@ public class ZigzagPracticeManager : MonoBehaviour
                 break;
         }
     }
+
     public bool IsCompleted => isCompleted;
     public bool IsFailed => isFailed;
     public bool IsActive => isActive;
     public PracticePhase CurrentPhase => currentPhase;
     public int GetZigzagMistakes() => mistakesPerPhase[0];
     public int GetTruckMistakes() => mistakesPerPhase[1];
+    public int GetZigzagDuration() => Mathf.RoundToInt(phaseDurations[0]);
+    public int GetTruckDuration() => Mathf.RoundToInt(phaseDurations[1]);
+
     public int TotalMistakes => mistakesPerPhase.Sum();
 }

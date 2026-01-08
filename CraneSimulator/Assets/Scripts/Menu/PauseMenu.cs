@@ -298,13 +298,13 @@ public class PauseMenu : MonoBehaviour
             { 
                 taskCode = "TASK_06", 
                 isPass = zigzagPass, 
-                durationSecond = 0 ,
+                durationSecond = zigzagPracticeManager.GetZigzagDuration() ,
                 mistake = zigzagPracticeManager.GetZigzagMistakes()
             });
             examTasks.Add(new SubmitSeTaskDto { 
                 taskCode = "TASK_08", 
                 isPass = truckPass, 
-                durationSecond = (int)Time.timeSinceLevelLoad ,
+                durationSecond = zigzagPracticeManager.GetTruckDuration(),
                 mistake = zigzagPracticeManager.GetTruckMistakes()
             });
 

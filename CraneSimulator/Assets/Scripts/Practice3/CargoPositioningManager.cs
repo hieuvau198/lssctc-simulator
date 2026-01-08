@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 
 public class CargoPositioningManager : MonoBehaviour
 {
@@ -20,6 +21,9 @@ public class CargoPositioningManager : MonoBehaviour
     private bool isFailed = false;
     private bool isCompleted = false;
     private float timer = 0f;
+
+    [Header("Result UI")]
+    public TextMeshProUGUI resultText;
 
     private int poleHitMistakes = 0;
     void Start()
@@ -73,12 +77,17 @@ public class CargoPositioningManager : MonoBehaviour
 
     public void StartPractice()
     {
+        
         isActive = true;
         isFailed = false;
         isCompleted = false;
         timer = 0f;
         poleHitMistakes = 0;
-        Debug.Log("Cargo Positioning Challenge started!");
+        if (resultText)
+        {
+            resultText.gameObject.SetActive(true);
+            resultText.text = "<color=#FFEB3B>ĐANG LÀM</color>";
+        }
     }
 
     public void DeductPoints(float amount)
@@ -96,13 +105,26 @@ public class CargoPositioningManager : MonoBehaviour
         isFailed = true;
         isActive = false;
 
-        Debug.Log($"Practice Failed: {reason} | Score: {totalPoints}");
+        if (resultText)
+        {
+            resultText.gameObject.SetActive(true);
+            resultText.text =
+                "<color=#FF5252>THẤT BẠI</color>";
+        }
+
     }
 
     public void SuccessPractice()
     {
         isCompleted = true;
         isActive = false;
+
+        if (resultText)
+        {
+            resultText.gameObject.SetActive(true);
+            resultText.text =
+                "<color=#4CAF50>HOÀN THÀNH</color>";
+        }
 
         Debug.Log($"Practice Completed! Final score: {totalPoints}, Time: {timer:F1}s");
     }
