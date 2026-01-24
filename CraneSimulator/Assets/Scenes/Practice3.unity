@@ -9106,9 +9106,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Task List
-
-'
+  m_text: "Nhi\u1EC7m v\u1EE5"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -29538,6 +29536,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2510951759769951070, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
+      propertyPath: m_text
+      value: "Nh\u1EA5n B \u0111\u1EC3 m\xF3c"
+      objectReference: {fileID: 0}
     - target: {fileID: 2513655970072038668, guid: 19672bbf802d5dc40ac23811da93aed2, type: 3}
       propertyPath: m_Name
       value: MobileCrane

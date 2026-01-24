@@ -130,7 +130,7 @@ public class PracticeAttemptCompleteResponse
     public int activityRecordId;
     public int practiceId;
     public string practiceCode;
-    public int score;
+    public float score;
     public string attemptDate;
     public string attemptStatus;
     public string description;
@@ -147,7 +147,7 @@ public class PracticeAttemptTaskResponse
     public int taskId;
     public string taskCode;
     public string taskName;
-    public int score;
+    public float score;
     public string description;
     public bool isPass;
 }
@@ -204,7 +204,7 @@ public class FinalExamResponse
     public string traineeName;
     public string traineeCode;
     public bool isPass;
-    public int totalMarks;
+    public float totalMarks;
     public string completeTime;
     public string examCode;
     public List<FinalExamPartial> partials;

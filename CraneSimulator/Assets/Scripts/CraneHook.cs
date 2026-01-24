@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CraneHook : MonoBehaviour
 {
@@ -104,7 +104,7 @@ public class CraneHook : MonoBehaviour
             if (attachHintText)
             {
                 attachHintText.gameObject.SetActive(true);
-                attachHintText.text = "Press B to Hook";
+                attachHintText.text = "Nhấn B để móc";
             }
         }
         else

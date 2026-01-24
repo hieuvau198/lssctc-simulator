@@ -97,6 +97,10 @@ public class CargoPositioningManager : MonoBehaviour
         if (totalPoints < 0) totalPoints = 0;
 
         Debug.Log($"Hit pole! -{amount} pts. Current score: {totalPoints}");
+        if (totalPoints < 5f)
+        {
+            FailPractice("Điểm dưới 5 – Tự động thất bại!");
+        }
     }
 
     public void FailPractice(string reason)
@@ -109,7 +113,7 @@ public class CargoPositioningManager : MonoBehaviour
         {
             resultText.gameObject.SetActive(true);
             resultText.text =
-                "<color=#FF5252>THẤT BẠI</color>";
+                $"<color=red>THẤT BẠI:</color> {reason}";
         }
 
     }

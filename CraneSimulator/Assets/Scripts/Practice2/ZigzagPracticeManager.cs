@@ -188,6 +188,11 @@ public class ZigzagPracticeManager : MonoBehaviour
         if (totalPoints < 0) totalPoints = 0;
 
         Debug.Log($"Hit pole in {currentPhase}! Mistake added to phase {phaseIndex}. Current Score: {totalPoints}");
+
+        if (totalPoints < 5f)
+        {
+            FailPractice("Điểm dưới 5 – Tự động thất bại!");
+        }
     }
     //public void DeductPoints(float amount)
     //{
